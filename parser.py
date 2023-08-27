@@ -2,7 +2,6 @@
 import requests
 from fake_useragent import UserAgent
 
-
 url_get = 'https://card.wb.ru/cards/detail?spp=0&regions=80,4,38,70,69,86,30,40,48,1,' \
           '112&pricemarginCoeff=1&reg=0&appType=1&emp=0&locale=ru&lang=ru&curr=rub&couponsGeo=' \
           '2,12,7,6,9,21,11&dest=-1221185,-147166,-1749247,123585533&nm='
@@ -22,7 +21,7 @@ def img_by_id(id_ph):
     """формирует ссылу на фото товара"""
     headers = {'User-Agent': UserAgent().chrome}
     short_id = int(id_ph) // 100000
-    basket =''
+    basket = ''
     match short_id:
         case num if num in range(0, 144):
             basket = '01'
@@ -50,15 +49,13 @@ def img_by_id(id_ph):
             basket = '12'
         case _:
             basket = '13'  # Если _short_id не входит ни в один из предыдущих диапазонов, присвоить '13' basket-у
-    s = f'https://basket-{basket}.wb.ru/vol{short_id}/part{int(id_ph)// 1000}/{id_ph}/images/c246x328/1.jpg'
+    s = f'https://basket-{basket}.wb.ru/vol{short_id}/part{int(id_ph) // 1000}/{id_ph}/images/c246x328/1.jpg'
     try:
         requests.get(s, headers)
         return s
     except:
         s = 'https://avatars.mds.yandex.net/i?id=a53e9cddb18926e986bddd7acb96cd3973307967-10088009-images-thumbs&n=13'
         return s
-
-
 
 
 def generates_link_request(id_prod):
@@ -97,4 +94,3 @@ def parsing_evry_day(url):
     a = generates_link_request(id_all)
     all_bd = (selects_values(a))
     return all_bd
-

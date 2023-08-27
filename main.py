@@ -5,12 +5,9 @@ from dotenv import dotenv_values
 
 from handlers import h_admin, h_user
 
-
 config = dotenv_values(".env", encoding="utf-8")
 
-
 TOKEN = config['TOKEN']
-
 
 
 async def main() -> None:

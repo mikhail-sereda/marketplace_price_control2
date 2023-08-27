@@ -6,8 +6,6 @@ from filters.my_filter import UserFilt
 
 from data import orm
 
-
-
 router: Router = Router()
 
 

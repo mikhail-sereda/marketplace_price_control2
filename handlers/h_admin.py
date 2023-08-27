@@ -13,6 +13,7 @@ router.message.filter(AdmFilter())  # применяем ко всем хенд�
 async def start_admin(msg: types.Message):
     await msg.answer(text='Привет', reply_markup=kb_main_admin)
 
+
 @router.message()
 async def parsing_link(msg: types.Message):
     url_list = msg.text.split('/')
@@ -27,13 +28,6 @@ async def parsing_link(msg: types.Message):
     print(id_prod)
     print(img_link)
     print(prod_info)
-
-
-
-
-
-
-
 
 
 @router.message()
