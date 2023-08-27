@@ -3,21 +3,16 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from dotenv import dotenv_values
 
-# from data.bd import DataBase
 from handlers import h_admin, h_user
 
 
 config = dotenv_values(".env", encoding="utf-8")
 
-dbname = config['db_name']
-host = config['HOST']
-user = config['USER']
-password = config['PASSWORD']
-ADMIN_ID = config['ADMIN_ID']
+
 TOKEN = config['TOKEN']
 
 
-# db = DataBase(dbname, host, user, password)
+
 async def main() -> None:
     dp: Dispatcher = Dispatcher()
     bot = Bot(token=TOKEN, parse_mode='HTML')

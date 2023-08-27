@@ -66,6 +66,7 @@ def generates_link_request(id_prod):
     headers = {'User-Agent': UserAgent().chrome}
     url_get_user = url_get + id_prod
     req = requests.get(url_get_user, headers)
+    print(req.json())
     return req.json()
 
 
@@ -83,14 +84,10 @@ def selects_values(js_dict):
     return dict_bd
 
 
-def all_pars(url):
+def all_pars(id_all):
     """При первом парсенге ссылки"""
-    id_all = defines_product_id(url)
-    lin = img_by_id(str(id_all))
     a = generates_link_request(id_all)
     all_bd = (selects_values(a))
-    all_bd.setdefault('link_photo', lin)
-    all_bd.setdefault('link', url.split('\n')[-1])
     return all_bd
 
 
