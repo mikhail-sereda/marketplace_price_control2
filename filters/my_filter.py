@@ -13,3 +13,4 @@ class UserFilt(Filter):
     async def __call__(self, msg: Message):
         print(22)
         return not orm.my_filter_user(msg.from_user.id)
+123
