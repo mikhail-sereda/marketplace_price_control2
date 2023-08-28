@@ -63,21 +63,18 @@ def generates_link_request(id_prod):
     headers = {'User-Agent': UserAgent().chrome}
     url_get_user = url_get + id_prod
     req = requests.get(url_get_user, headers)
-    print(req.json())
     return req.json()
 
 
 def selects_values(js_dict):
     """Выбирает нужные характеристики"""
-    a = ['id', 'name']
-    dict_bd = {}
-    for i in js_dict['data']['products'][0].items():
-        if i[0] in a:
-            dict_bd.setdefault(i[0], i[1])
+    dict_bd = dict()
+    dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
+    dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
     try:
-        dict_bd.setdefault('basicPriceU', js_dict['data']['products'][0]['extended']['basicPriceU'])
+        dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU']
     except KeyError:
-        dict_bd.setdefault('basicPriceU', js_dict['data']['products'][0]['priceU'])
+        dict_bd['price'] = js_dict['data']['products'][0]['priceU']
     return dict_bd
 
 
