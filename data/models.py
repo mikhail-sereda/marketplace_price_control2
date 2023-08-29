@@ -25,6 +25,7 @@ class UserProduct(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
     id_prod = Column(BigInteger, nullable=False)
+    add_date = Column(DateTime, default=datetime.now, nullable=False)
     name_prod = Column(String, nullable=False)
     start_price = Column(Float, nullable=False)
     min_price = Column(Float, nullable=False)
@@ -34,10 +35,3 @@ class UserProduct(Base):
     valve = Column(Integer, default=1, nullable=False)
 
 
-
-
-
-
-
-    def __repr__(self):
-        return self.id_tg

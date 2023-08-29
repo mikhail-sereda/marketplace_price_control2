@@ -17,29 +17,43 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
 
-def add_user(user_id):
-    session = Session()
-    new_user = User(user_id=user_id)
-    session.add(new_user)
-    session.commit()
-
-
-def my_filter_user(user_id: int):
-    session = Session()
-    user1 = session.query(User).filter(User.user_id == user_id).first()
-    return bool(user1)
-
-
-def add_product(product: dict):
-    """добавляет новый товар и возвращает True, если пользователь уже следит за товаром возвращает False"""
-    session = Session()
-    replay_product = session.query(UserProduct).filter(UserProduct.user_id == product['user_id'],
-                                                       UserProduct.id_prod == product['id_prod']).first()
-    if not replay_product:
-        session.execute(UserProduct.__table__.insert(), product)
-        # new_product = UserProduct(**product) #
-        # session.add(new_product)
+def db_add_user(user_id):
+    with Session() as session:
+        new_user = User(user_id=user_id)
+        session.add(new_user)
         session.commit()
-        return True
-    else:
-        return False
+
+
+def db_my_filter_user(user_id: int):
+    with Session() as session:
+        user1 = session.query(User).filter(User.user_id == user_id).first()
+        return bool(user1)
+
+
+def db_add_product(product: dict):
+    """добавляет новый товар и возвращает True, если пользователь уже следит за товаром возвращает False"""
+    with Session() as session:
+        replay_product = session.query(UserProduct).filter(UserProduct.user_id == product['user_id'],
+                                                           UserProduct.id_prod == product['id_prod']).first()
+        if not replay_product:
+            session.execute(UserProduct.__table__.insert(), product)
+            session.commit()
+            return True
+
+        else:
+            session.commit()
+            return False
+
+
+
+def db_get_user_product(id_user):
+    """Отдаёт все товары пользователя па id user"""
+    with Session() as session:
+        all_prod = session.query(UserProduct).order_by(UserProduct.id).filter(
+            UserProduct.user_id == id_user).all()
+        return all_prod
+
+def db_get_profile(id_user):
+    """Отдаёт данные профиля па id user"""
+    with Session() as session:
+        return session.query(User).filter(User.user_id == id_user).first()
