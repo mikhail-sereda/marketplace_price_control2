@@ -45,13 +45,27 @@ def db_add_product(product: dict):
             return False
 
 
-
 def db_get_user_product(id_user):
     """Отдаёт все товары пользователя па id user"""
     with Session() as session:
         all_prod = session.query(UserProduct).order_by(UserProduct.id).filter(
             UserProduct.user_id == id_user).all()
         return all_prod
+
+
+def db_get_count_product_user(id_user):
+    """Отдаёт количество товаров пользователя па id user"""
+    with Session() as session:
+        count = session.query(UserProduct).filter(UserProduct.user_id == id_user).count()
+        return count
+
+
+def db_dell_product(id_rec):
+    with Session() as session:
+        record_to_delete = session.query(UserProduct).filter(UserProduct.id == id_rec).first()
+        session.delete(record_to_delete)
+        session.commit()
+
 
 def db_get_profile(id_user):
     """Отдаёт данные профиля па id user"""
