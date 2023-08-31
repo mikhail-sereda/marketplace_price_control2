@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from dotenv import dotenv_values
 
-from data.models import User, UserProduct, Base
+from data.models import User, UserProduct, Tariffs, Base
 
 config = dotenv_values(".env", encoding="utf-8")
 ADMIN_ID = config['ADMIN_ID']
@@ -60,14 +60,21 @@ def db_get_count_product_user(id_user):
         return count
 
 
+def db_get_profile(id_user):
+    """Отдаёт данные профиля па id user"""
+    with Session() as session:
+        return session.query(User).filter(User.user_id == id_user).first()
+
+
 def db_dell_product(id_rec):
     with Session() as session:
         record_to_delete = session.query(UserProduct).filter(UserProduct.id == id_rec).first()
         session.delete(record_to_delete)
         session.commit()
 
-
-def db_get_profile(id_user):
-    """Отдаёт данные профиля па id user"""
+"""Tariffs"""
+def db_get_tariffs(index_activ):
+    """Получает активные или не активные тарифы """
     with Session() as session:
-        return session.query(User).filter(User.user_id == id_user).first()
+        return session.query(Tariffs).filter(Tariffs.active_tariff == index_activ).all()
+

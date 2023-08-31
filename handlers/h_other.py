@@ -20,6 +20,11 @@ async def help_all(msg: types.Message):
     """Обрабатывает кнопку помощь для всех пользователей"""    
     await msg.answer(text=f'Помощь {msg.from_user.first_name}', reply_markup=kb_main_user)
 
+@router.message(F.text=='Полезное')
+async def useful(msg: types.Message):
+    """Обрабатывает кнопку полезное для всех пользователей"""
+    await msg.answer(text=f'Ссылки на полезные ресурсы', reply_markup=kb_main_user)
+
 
 @router.message()
 async def parsing_link(msg: types.Message):

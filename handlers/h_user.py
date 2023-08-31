@@ -38,10 +38,10 @@ async def user_products(msg: types.Message):
 
 @router.callback_query(lambda x: x.data.startswith('track'))
 async def product_pagination(callback: types.CallbackQuery):
-    """Обработка кнопокки пагинации"""
-    inl_com = callback.data.split(':')
+    """Обработка кнопокки пагинации моих товаров"""
+    inl_col = callback.data.split(':')
     all_product = orm.db_get_user_product(callback.from_user.id)
-    page_number = int(inl_com[1])
+    page_number = int(inl_col[1])
     photo = types.InputMediaPhoto(media=all_product[page_number].photo_link,
                                   caption=f'<a href="{all_product[page_number].link}"><b>{all_product[page_number].name_prod}</b></a>\n\n'
                                           f'<b>Начальная цена: </b>{all_product[page_number].start_price} руб.\n'
@@ -58,8 +58,8 @@ async def product_pagination(callback: types.CallbackQuery):
 @router.callback_query(lambda x: x.data.startswith('delall'))
 async def del_all_product(callback: types.CallbackQuery):
     """Удаление последнего товара"""
-    inl_com = callback.data.split(':')
-    orm.db_dell_product(int(inl_com[1]))
+    inl_col = callback.data.split(':')
+    orm.db_dell_product(int(inl_col[1]))
     await callback.message.delete()
     await callback.answer(text='нет товаров')  # удаляем сообщеие с пагинацией и удаляем последний товар
 
@@ -67,10 +67,10 @@ async def del_all_product(callback: types.CallbackQuery):
 @router.callback_query(lambda x: x.data.startswith('delpr'))
 async def del_product(callback: types.CallbackQuery):
     """Удаление товара если в списке больше однго товара"""
-    inl_com = callback.data.split(':')
-    orm.db_dell_product(int(inl_com[1]))  # удаляет товар из бд
+    inl_col = callback.data.split(':')
+    orm.db_dell_product(int(inl_col[1]))  # удаляет товар из бд
     all_product = orm.db_get_user_product(callback.from_user.id)
-    page_number = int(inl_com[2])
+    page_number = int(inl_col[2])
     await callback.answer(text=f'Кнопка', reply_markup=kb_main_user)
     photo = types.InputMediaPhoto(media=all_product[page_number].photo_link,
                                   caption=f'<a href="{all_product[page_number].link}"><b>{all_product[page_number].name_prod}</b></a>\n\n'

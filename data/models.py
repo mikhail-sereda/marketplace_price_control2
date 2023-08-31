@@ -35,3 +35,14 @@ class UserProduct(Base):
     valve = Column(Integer, default=1, nullable=False)
 
 
+class Tariffs(Base):
+    __tablename__ = 'tariffs'
+    id = Column(Integer, primary_key=True)
+    add_date = Column(DateTime, default=datetime.now, nullable=False)
+    name_tariff = Column(String, nullable=False)
+    tracked_items = Column(Integer, default=3, nullable=False)
+    price_tariff = Column(Float, nullable=False)
+    number_activations = Column(Integer, default=0, nullable=False)
+    active_tariff = Column(Integer, default=1, nullable=False)
+
+
