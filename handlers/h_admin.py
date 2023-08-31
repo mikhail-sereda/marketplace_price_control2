@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart
 
 from keyboards.kb_admin import kb_main_admin
 from filters.my_filter import AdmFilter
-from parser import img_by_id, all_pars
+from parser1 import img_by_id, all_pars
 from data import orm
 
 

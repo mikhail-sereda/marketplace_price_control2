@@ -24,8 +24,6 @@ async def user_products(msg: types.Message):
     all_product = orm.db_get_user_product(msg.from_user.id)
     if all_product:
         page_number = 0
-        await msg.answer(text=f'Кнопка', reply_markup=kb_main_user)
-
         await msg.answer_photo(photo=all_product[page_number].photo_link,
                                caption=f'<a href="{all_product[page_number].link}"><b>{all_product[page_number].name_prod}</b></a>\n\n'
                                        f'<b>Начальная цена: </b>{all_product[page_number].start_price} руб.\n'
@@ -100,10 +98,7 @@ async def user_profile(msg: types.Message):
                           f'<b>Баланс: </b>{profile_user.balance}\n',
                      reply_markup=await gen_markup_profile())
 
-# @router.message()
-# async def user_help(msg: types.Message):
-#     """Кнопка Мои товары"""
-#     pass
+
 
 # @router.message()
 # async def eho_user(msg: types.Message):

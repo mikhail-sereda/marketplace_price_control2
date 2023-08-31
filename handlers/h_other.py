@@ -1,9 +1,9 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 
 from keyboards.kb_user import kb_main_user
 from data import orm
-from parser import img_by_id, all_pars
+from parser1 import img_by_id, all_pars
 
 router: Router = Router()
 
@@ -13,6 +13,12 @@ async def start_other(msg: types.Message):
     """при входе нового пользователя добавляет в БД"""
     orm.db_add_user(msg.from_user.id)
     await msg.answer(text=f'Привет {msg.from_user.first_name}', reply_markup=kb_main_user)
+
+
+@router.message(F.text=='Помощь')
+async def help_all(msg: types.Message):
+    """Обрабатывает кнопку помощь для всех пользователей"""    
+    await msg.answer(text=f'Помощь {msg.from_user.first_name}', reply_markup=kb_main_user)
 
 
 @router.message()
@@ -36,3 +42,5 @@ async def parsing_link(msg: types.Message):
         await msg.answer_photo(photo=img_link, caption=prod_info['name_prod'])
     else:
         await msg.answer(text='Ссылка уже отслеживается')
+
+
