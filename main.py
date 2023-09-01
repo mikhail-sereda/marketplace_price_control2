@@ -1,6 +1,7 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import dotenv_values
 
 from handlers import h_admin, h_user, h_other
@@ -11,7 +12,7 @@ TOKEN = config['TOKEN']
 
 
 async def main() -> None:
-    dp: Dispatcher = Dispatcher()
+    dp: Dispatcher = Dispatcher(storage=MemoryStorage)
     bot = Bot(token=TOKEN, parse_mode='HTML')
     dp.include_router(h_admin.router)
     dp.include_router(h_user.router)

@@ -10,7 +10,7 @@ from data import orm
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
 
-
+# https://mastergroosha.github.io/aiogram-3-guide/fsm/
 @router.message(CommandStart())
 async def start_admin(msg: types.Message):
     await msg.answer(text='Привет', reply_markup=kb_main_admin)
@@ -24,6 +24,7 @@ async def useful(msg: types.Message):
 
 @router.callback_query(lambda x: x.data.startswith('tariff_active'))
 async def returns_all_tariff_to_the_admin(callback: types.CallbackQuery):
+    """Показывает активные или не активные тарифы"""
     inl_col = callback.data.split(':')
     if int(inl_col[1]):
         tariffs = orm.db_get_tariffs(1)
@@ -37,6 +38,12 @@ async def returns_all_tariff_to_the_admin(callback: types.CallbackQuery):
         pass
     else:
         await callback.answer(text=f'Нет неактивных тарифов')
+
+
+@router.callback_qery(lambda x: x.data.startswith)
+async def add_tariff(callback: types.CallbackQuery)
+    """Добавление нового тарифа"""
+
 
 # @router.message()
 # async def eho_admin(msg: types.Message):
