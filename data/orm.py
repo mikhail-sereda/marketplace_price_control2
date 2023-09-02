@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 
 from dotenv import dotenv_values
@@ -72,9 +72,25 @@ def db_dell_product(id_rec):
         session.delete(record_to_delete)
         session.commit()
 
+
 """Tariffs"""
+
+
 def db_get_tariffs(index_activ):
     """Получает активные или не активные тарифы """
     with Session() as session:
         return session.query(Tariffs).filter(Tariffs.active_tariff == index_activ).all()
 
+
+def db_add_new_tariff(new_tariff):
+    with Session() as session:
+        replay_tariff = session.query(Tariffs).filter(Tariffs.name_tariff == new_tariff['name_tariff'],
+                                                          Tariffs.price_tariff == float(new_tariff['price_tariff'])).first()
+        if not replay_tariff:
+            session.execute(insert(Tariffs).values(new_tariff))
+            session.commit()
+            return True
+
+        else:
+            session.commit()
+            return False

@@ -12,7 +12,7 @@ TOKEN = config['TOKEN']
 
 
 async def main() -> None:
-    dp: Dispatcher = Dispatcher(storage=MemoryStorage)
+    dp: Dispatcher = Dispatcher(storage=MemoryStorage())
     bot = Bot(token=TOKEN, parse_mode='HTML')
     dp.include_router(h_admin.router)
     dp.include_router(h_user.router)
