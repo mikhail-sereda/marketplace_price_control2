@@ -85,7 +85,7 @@ def db_get_tariffs(index_activ):
 def db_add_new_tariff(new_tariff):
     with Session() as session:
         replay_tariff = session.query(Tariffs).filter(Tariffs.name_tariff == new_tariff['name_tariff'],
-                                                          Tariffs.price_tariff == float(new_tariff['price_tariff'])).first()
+                                                      Tariffs.price_tariff == float(new_tariff['price_tariff'])).first()
         if not replay_tariff:
             session.execute(insert(Tariffs).values(new_tariff))
             session.commit()
@@ -94,3 +94,17 @@ def db_add_new_tariff(new_tariff):
         else:
             session.commit()
             return False
+
+
+def db_dell_tariff(id_tariff):
+    with Session() as session:
+        record_to_delete = session.query(Tariffs).filter(Tariffs.id == id_tariff).first()
+        session.delete(record_to_delete)
+        session.commit()
+
+
+def db_actions_with_tariffs(id_tariff, active_tariff):
+    with Session() as session:
+        tariff = session.query(Tariffs).filter(Tariffs.id == id_tariff).first()
+        tariff.active_tariff = active_tariff
+        session.commit()

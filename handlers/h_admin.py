@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 from keyboards.kb_admin import kb_main_admin
-from keyboards.ikb_admin import gen_markup_category_tariff, gen_markup_cancel_fsm
+from keyboards.ikb_admin import gen_markup_category_tariff, gen_markup_cancel_fsm, gen_markup_menu_tariff
 from filters.my_filter import AdmFilter
 from parser1 import img_by_id, all_pars
 from data import orm
@@ -30,20 +30,41 @@ async def useful(msg: types.Message):
 async def returns_all_tariff_to_the_admin(callback: types.CallbackQuery):
     """Показывает активные или не активные тарифы"""
     inl_col = callback.data.split(':')
-    if int(inl_col[1]):
+    if int(inl_col[1]) == 1:
         tariffs = orm.db_get_tariffs(1)
         if tariffs:
             for tariff in tariffs:
-                await callback.message.answer(text=f'{tariff.name_tariff}')
+                await callback.message.answer(text=f'{tariff.name_tariff}',
+                                              reply_markup=await gen_markup_menu_tariff(tariff.id))
         else:
-            await callback.message.answer(text=f'Нет активных тарифов')
-    else:
+            await callback.answer(text=f'Нет активных тарифов')
+    elif int(inl_col[1]) == 0:
         tariffs = orm.db_get_tariffs(0)
         if tariffs:
             for tariff in tariffs:
-                await callback.message.answer(text=f'{tariff.name_tariff}')
+                await callback.message.answer(text=f'{tariff.name_tariff}',
+                                              reply_markup=await gen_markup_menu_tariff(tariff.id, 0))
         else:
             await callback.answer(text=f'Нет неактивных тарифов')
+
+
+@router.callback_query(lambda x: x.data.startswith('tar_action'))
+async def tariff_action(callback: types.CallbackQuery):
+    """действия с существующими тарифами (включение, выключение, удаление)"""
+    inl_col = callback.data.split(':')
+    match int(inl_col[2]):
+        case 1:
+            orm.db_actions_with_tariffs(int(inl_col[1]), 1)
+            await callback.answer(text=f'Тариф активирова')
+            await callback.message.delete()
+        case 0:
+            orm.db_actions_with_tariffs(int(inl_col[1]), 0)
+            await callback.answer(text=f'Тариф выключен')
+            await callback.message.delete()
+        case 2:
+            orm.db_dell_tariff(int(inl_col[1]))
+            await callback.answer(text=f'Тариф удалён')
+            await callback.message.delete()
 
 
 @router.callback_query(lambda x: x.data.startswith('add_tariff'))
