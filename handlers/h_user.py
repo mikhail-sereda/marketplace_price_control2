@@ -84,7 +84,7 @@ async def del_product(callback: types.CallbackQuery):
 
 
 @router.message(F.text == 'Профиль')
-async def user_profile(msg: types.Message):
+async def get_user_profile(msg: types.Message):
     """Кнопка Профиль"""
     id_user = msg.from_user.id
     profile_user = orm.db_get_profile(id_user)
@@ -97,6 +97,17 @@ async def user_profile(msg: types.Message):
                           f'<b>Тариф: </b>{profile_user.tariff_user}\n'
                           f'<b>Баланс: </b>{profile_user.balance}\n',
                      reply_markup=await gen_markup_profile())
+@router.callback_query(lambda x: x.data.startswith('u_tariff'))
+async def get_tariff_for_users(callback: types.CallbackQuery):
+    active_tariff = orm.db_get_tariffs(1)
+    text_farifs = ''
+    for text in active_tariff:
+        text_farifs += f'<b><u>{text.name_tariff}</u></b>\n\n' \
+                       f'До {text.tracked_items} ссылок\n' \
+                       f'Стоимость {text.price_tariff} руб.\n' \
+                       f'{"➖"*10}\n'
+    await callback.message.answer(text=text_farifs)
+
 
 
 

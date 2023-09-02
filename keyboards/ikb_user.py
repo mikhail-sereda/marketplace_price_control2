@@ -35,9 +35,15 @@ async def gen_markup_pagination(id_prod, products_len, page_number=0):
 
 
 async def gen_markup_profile():
-    """Создаёт инлайн клавиатуру пагинации товаров
-    page_number-порядковый номер товара, seller_id, trecked-1 отслеживается 0 нет,
-    products_len - количество товаров в базе"""
+    """Создаёт инлайн клавиатуру к профайлу"""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f'Тарифы', callback_data=f'tariff'),
+        [InlineKeyboardButton(text=f'Тарифы', callback_data=f'u_tariff'),
          InlineKeyboardButton(text=f'Пополнить баланс', callback_data='money')]])
+
+# async def gen_markup_users_tariff():
+#     """Создаёт инлайн клавиатуру к профайлу"""
+#     return InlineKeyboardMarkup(inline_keyboard=[
+#         [InlineKeyboardButton(text=f'Тарифы', callback_data=f'tariff'),
+#          InlineKeyboardButton(text=f'Пополнить баланс', callback_data='money')]])
+
+

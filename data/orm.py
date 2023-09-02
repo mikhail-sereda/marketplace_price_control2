@@ -19,9 +19,11 @@ Session = sessionmaker(bind=engine)
 
 def db_add_user(user_id):
     with Session() as session:
-        new_user = User(user_id=user_id)
-        session.add(new_user)
-        session.commit()
+        replay_user = session.query(User).filter(User.user_id == user_id).first()
+        if not replay_user:
+            new_user = User(user_id=user_id)
+            session.add(new_user)
+            session.commit()
 
 
 def db_my_filter_user(user_id: int):
@@ -79,7 +81,7 @@ def db_dell_product(id_rec):
 def db_get_tariffs(index_activ):
     """Получает активные или не активные тарифы """
     with Session() as session:
-        return session.query(Tariffs).filter(Tariffs.active_tariff == index_activ).all()
+        return session.query(Tariffs).order_by(Tariffs.price_tariff).filter(Tariffs.active_tariff == index_activ).all()
 
 
 def db_add_new_tariff(new_tariff):
@@ -97,6 +99,7 @@ def db_add_new_tariff(new_tariff):
 
 
 def db_dell_tariff(id_tariff):
+    """удаление тарифа"""
     with Session() as session:
         record_to_delete = session.query(Tariffs).filter(Tariffs.id == id_tariff).first()
         session.delete(record_to_delete)
@@ -104,6 +107,7 @@ def db_dell_tariff(id_tariff):
 
 
 def db_actions_with_tariffs(id_tariff, active_tariff):
+    """изменяет активацию тарифа (0 или 1) в колонке active_tariff"""
     with Session() as session:
         tariff = session.query(Tariffs).filter(Tariffs.id == id_tariff).first()
         tariff.active_tariff = active_tariff
