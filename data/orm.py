@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 
@@ -30,6 +32,20 @@ def db_my_filter_user(user_id: int):
     with Session() as session:
         user1 = session.query(User).filter(User.user_id == user_id).first()
         return bool(user1)
+
+
+def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int):
+    """Изменяет тариф у пользователя"""
+    with Session() as session:
+        print(name_tariff, id_user, tracked_items)
+        one_user = session.query(User).filter(User.user_id == id_user).first()
+        one_user.tariff_user = name_tariff
+        print(1)
+        one_user.tracked_items = tracked_items
+        print(2)
+        one_user.tariff_user_date = datetime.now()
+        print(3)
+        session.commit()
 
 
 def db_add_product(product: dict):
@@ -82,6 +98,12 @@ def db_get_tariffs(index_activ):
     """Получает активные или не активные тарифы """
     with Session() as session:
         return session.query(Tariffs).order_by(Tariffs.price_tariff).filter(Tariffs.active_tariff == index_activ).all()
+
+
+def db_get_one_tariff(id_tariff):
+    """Получает тариф по id"""
+    with Session() as session:
+        return session.query(Tariffs).get(id_tariff)
 
 
 def db_add_new_tariff(new_tariff):

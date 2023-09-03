@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 async def gen_markup_pagination(id_prod, products_len, page_number=0):
@@ -40,10 +41,16 @@ async def gen_markup_profile():
         [InlineKeyboardButton(text=f'Тарифы', callback_data=f'u_tariff'),
          InlineKeyboardButton(text=f'Пополнить баланс', callback_data='money')]])
 
-# async def gen_markup_users_tariff():
-#     """Создаёт инлайн клавиатуру к профайлу"""
-#     return InlineKeyboardMarkup(inline_keyboard=[
-#         [InlineKeyboardButton(text=f'Тарифы', callback_data=f'tariff'),
-#          InlineKeyboardButton(text=f'Пополнить баланс', callback_data='money')]])
+
+async def gen_markup_users_tariff(tariffs):
+    """Создаёт инлайн клавиатуру из доступных тарифов для пользователя"""
+    builder = InlineKeyboardBuilder()
+    for tariff in tariffs:
+        builder.row(InlineKeyboardButton(text=f'{tariff[0]}',
+                                         callback_data=f'plugtariff:{tariff[1]}'), width=1)
+
+    return builder.as_markup()
+
+
 
 

@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart
 # from aiogram.types import CallbackQuery
 
 from keyboards.kb_user import kb_main_user
-from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile
+from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile, gen_markup_users_tariff
 from filters.my_filter import UserFilt
 
 from data import orm
@@ -97,20 +97,33 @@ async def get_user_profile(msg: types.Message):
                           f'<b>Тариф: </b>{profile_user.tariff_user}\n'
                           f'<b>Баланс: </b>{profile_user.balance}\n',
                      reply_markup=await gen_markup_profile())
+
+
 @router.callback_query(lambda x: x.data.startswith('u_tariff'))
 async def get_tariff_for_users(callback: types.CallbackQuery):
+    """Показывает активные тарифы и кнопки подключения юзеру"""
     active_tariff = orm.db_get_tariffs(1)
-    text_farifs = ''
+    text_fariffs = ''
+    name_tariffs = []
     for text in active_tariff:
-        text_farifs += f'<b><u>{text.name_tariff}</u></b>\n\n' \
+        print(text.id)
+        text_fariffs += f'<b><u>{text.name_tariff}</u></b>\n\n' \
                        f'До {text.tracked_items} ссылок\n' \
                        f'Стоимость {text.price_tariff} руб.\n' \
-                       f'{"➖"*10}\n'
-    await callback.message.answer(text=text_farifs)
+                       f'{"➖" * 10}\n'
+        name_tariffs.append([text.name_tariff, text.id])
+    await callback.message.answer(text=text_fariffs, reply_markup= await gen_markup_users_tariff(name_tariffs))
+
+
+@router.callback_query(lambda x: x.data.startswith('plugtariff'))
+async def connects_tariff(callback: types.CallbackQuery):
+    inl_col = callback.data.split(':')
+    tariff = orm.db_get_one_tariff(int(inl_col[1]))
+    print(tariff.name_tariff, tariff.tracked_items)
+    orm.db_changes_user_tariff(name_tariff=tariff.name_tariff,
+                               id_user=callback.from_user.id,
+                               tracked_items=tariff.tracked_items)
 
 
 
 
-# @router.message()
-# async def eho_user(msg: types.Message):
-#     await msg.answer(text='ответ', reply_markup=kb_main_user)
