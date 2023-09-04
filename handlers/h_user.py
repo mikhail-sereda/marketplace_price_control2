@@ -1,12 +1,15 @@
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
-# from aiogram.types import CallbackQuery
+from aiogram.fsm.context import FSMContext
 
 from keyboards.kb_user import kb_main_user
-from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile, gen_markup_users_tariff
+from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile, gen_markup_users_tariff, \
+    gen_markup_replenishes
+from keyboards.ikb_admin import gen_markup_cancel_fsm
 from filters.my_filter import UserFilt
-
 from data import orm
+from data.FSMbot.FSMusers import ChequeFSM
+from data.orm import ADMIN_ID
 
 router: Router = Router()
 
@@ -53,6 +56,7 @@ async def product_pagination(callback: types.CallbackQuery):
                                           str(all_product[page_number].id),
                                           len(all_product),
                                           page_number=page_number))
+    await callback.answer()
 
 
 @router.callback_query(lambda x: x.data.startswith('delall'))
@@ -62,6 +66,7 @@ async def del_all_product(callback: types.CallbackQuery):
     orm.db_dell_product(int(inl_col[1]))
     await callback.message.delete()
     await callback.answer(text='нет товаров')  # удаляем сообщеие с пагинацией и удаляем последний товар
+    await callback.answer()
 
 
 @router.callback_query(lambda x: x.data.startswith('delpr'))
@@ -81,6 +86,7 @@ async def del_product(callback: types.CallbackQuery):
                                       reply_markup=await gen_markup_pagination(str(all_product[page_number].id),
                                                                                len(all_product),
                                                                                page_number=page_number))
+    await callback.answer()
 
 
 @router.message(F.text == 'Профиль')
@@ -90,12 +96,12 @@ async def get_user_profile(msg: types.Message):
     profile_user = orm.db_get_profile(id_user)
     count = orm.db_get_count_product_user(id_user)
     await msg.answer(text=f'<b>___Профиль___</b>\n\n'
-                          f'<b>Имя: </b>{msg.from_user.first_name}\n'
-                          f'<b>ID: </b>{id_user}\n'
-                          f'<b>Количество товаров: </b>{count}\n'
-                          f'<b>Товаров отслеживается: </b>10\n'
-                          f'<b>Тариф: </b>{profile_user.tariff_user}\n'
-                          f'<b>Баланс: </b>{profile_user.balance}\n',
+                          f'<b>Имя: </b>{msg.from_user.first_name}\n\n'
+                          f'<b>ID: </b>{id_user}\n\n'
+                          f'<b>Количество товаров: </b>{count}\n\n'
+                          f'<b>Товаров отслеживается: </b>{profile_user.tracked_items}\n\n'
+                          f'<b>Тариф: </b>{profile_user.tariff_user}\n\n'
+                          f'<b>Баланс: </b>{profile_user.balance} руб.\n\n',
                      reply_markup=await gen_markup_profile())
 
 
@@ -106,24 +112,56 @@ async def get_tariff_for_users(callback: types.CallbackQuery):
     text_fariffs = ''
     name_tariffs = []
     for text in active_tariff:
-        print(text.id)
         text_fariffs += f'<b><u>{text.name_tariff}</u></b>\n\n' \
-                       f'До {text.tracked_items} ссылок\n' \
-                       f'Стоимость {text.price_tariff} руб.\n' \
-                       f'{"➖" * 10}\n'
+                        f'До {text.tracked_items} ссылок\n' \
+                        f'Стоимость {text.price_tariff} руб.\n' \
+                        f'{"➖" * 10}\n'
         name_tariffs.append([text.name_tariff, text.id])
-    await callback.message.answer(text=text_fariffs, reply_markup= await gen_markup_users_tariff(name_tariffs))
+    await callback.message.answer(text=text_fariffs, reply_markup=await gen_markup_users_tariff(name_tariffs))
+    await callback.answer()
 
 
 @router.callback_query(lambda x: x.data.startswith('plugtariff'))
 async def connects_tariff(callback: types.CallbackQuery):
+    """Обработка кнопок изменения тарифа с проверкой и изменением баланса."""
     inl_col = callback.data.split(':')
     tariff = orm.db_get_one_tariff(int(inl_col[1]))
-    print(tariff.name_tariff, tariff.tracked_items)
-    orm.db_changes_user_tariff(name_tariff=tariff.name_tariff,
-                               id_user=callback.from_user.id,
-                               tracked_items=tariff.tracked_items)
+    profile_user = orm.db_get_profile(callback.from_user.id)
+    if profile_user.tariff_user == tariff.name_tariff:
+        await callback.message.answer(f'У вас уже подключен тариф {tariff.name_tariff}')
+        await callback.answer()
+    elif profile_user.balance < tariff.price_tariff:
+        await callback.message.answer(f'У вас недостаточно средств на счету.', reply_markup=await gen_markup_profile())
+        await callback.answer()
+    else:
+        orm.db_changes_user_tariff(name_tariff=tariff.name_tariff,
+                                   id_user=callback.from_user.id,
+                                   tracked_items=tariff.tracked_items,
+                                   balance=profile_user.balance - tariff.price_tariff)
+        await callback.answer(text=f'Вы подключили тариф {tariff.name_tariff}.\n'
+                                   f'Вы можете отслеживать до {tariff.tracked_items} ссылок')
 
 
+@router.callback_query(lambda x: x.data.startswith('money'))
+async def replenishes_account(callback: types.CallbackQuery):
+    """Обрабатывает кнопку пополнить баланс"""
+    await callback.message.answer(
+        f'На данный момент пополнение счёта производится только переводом на карту\n 1346413169461\n'
+        f'После перевода сохраните чек, нажмите на кнопку оплачено и отправьте чек об оплате.\n'
+        f'После проверки платежа ваш баланс будет пополнен.\n'
+        f'О пополнении баланса мы вам пришлём уведомление.\n'
+        f'Проверка платежа поизводится в ручную и занимает от 10 мин до 8 часов.\n',
+        reply_markup=await gen_markup_replenishes(callback.from_user.id))
+    await callback.answer()
 
 
+@router.callback_query(lambda x: x.data.startswith('pay'))
+async def replenishes_account(callback: types.CallbackQuery, state: FSMContext):
+    """Добавление нового тарифа старт FSM"""
+    await callback.message.answer(text='Пришлите подтверждение платежа', reply_markup=await gen_markup_cancel_fsm())
+    await state.set_state(ChequeFSM.screen_cheque)
+
+@router.message(ChequeFSM.screen_cheque)
+async def sends_payment_receipt(msg: types.Message, state: FSMContext):
+    await msg.forward(chat_id=ADMIN_ID)
+    await state.clear()

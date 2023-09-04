@@ -52,5 +52,7 @@ async def gen_markup_users_tariff(tariffs):
     return builder.as_markup()
 
 
-
-
+async def gen_markup_replenishes(user_id):
+    """Создаёт инлайн кнопку оплачено"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f'Оплачено', callback_data=f'pay:{user_id}')]])

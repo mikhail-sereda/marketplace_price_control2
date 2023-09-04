@@ -34,17 +34,14 @@ def db_my_filter_user(user_id: int):
         return bool(user1)
 
 
-def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int):
+def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int, balance: float):
     """Изменяет тариф у пользователя"""
     with Session() as session:
-        print(name_tariff, id_user, tracked_items)
         one_user = session.query(User).filter(User.user_id == id_user).first()
         one_user.tariff_user = name_tariff
-        print(1)
         one_user.tracked_items = tracked_items
-        print(2)
         one_user.tariff_user_date = datetime.now()
-        print(3)
+        one_user.balance = balance
         session.commit()
 
 

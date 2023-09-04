@@ -14,7 +14,7 @@ class User(Base):
     user_id = Column(BigInteger, nullable=False, unique=True)
     activ = Column(Integer, default=1, nullable=False)
     balance = Column(Float, default=0, nullable=False)
-    tariff_user = Column(String, default='Стандарт')
+    tariff_user = Column(String, default='Стандартный')
     tracked_items = Column(Integer, default=3, nullable=False)
     tariff_user_date = Column(DateTime, default=datetime.now, nullable=False)
     all_many = Column(Float, default=0)
