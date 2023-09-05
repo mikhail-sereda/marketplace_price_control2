@@ -1,29 +1,22 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
-from dotenv import dotenv_values
+from create_bot import bot, dp
 
 from handlers import h_admin, h_user, h_other
-
-config = dotenv_values(".env", encoding="utf-8")
-
-TOKEN = config['TOKEN']
+from parser1 import parsing_price_thread
 
 
 async def main() -> None:
-    dp: Dispatcher = Dispatcher(storage=MemoryStorage())
-    bot = Bot(token=TOKEN, parse_mode='HTML')
     dp.include_router(h_admin.router)
     dp.include_router(h_user.router)
     dp.include_router(h_other.router)
-
     await bot.delete_webhook(drop_pending_updates=True)
+    loop = asyncio.get_event_loop()
+    loop.create_task(parsing_price_thread(1))
     await dp.start_polling(bot)
 
 
 if __name__ == '__main__':
-    # loop = asyncio.get_event_loop()
-    # loop.create_task(parsing_price(10))
+
     # loop.create_task(parsing_price2(15))
     asyncio.run(main())

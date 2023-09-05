@@ -42,7 +42,6 @@ async def parsing_link(msg: types.Message):
     product_dict['start_price'] = prod_info['price']
     img_link = img_by_id(id_prod)
     product_dict['photo_link'] = img_link
-    print(product_dict)
     if orm.db_add_product(product_dict):
         await msg.answer_photo(photo=img_link, caption=prod_info['name_prod'])
     else:

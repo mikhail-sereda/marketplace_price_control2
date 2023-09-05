@@ -6,7 +6,6 @@ from aiogram.fsm.state import StatesGroup, State
 from keyboards.kb_admin import kb_main_admin
 from keyboards.ikb_admin import gen_markup_category_tariff, gen_markup_cancel_fsm, gen_markup_menu_tariff
 from filters.my_filter import AdmFilter
-from parser1 import img_by_id, all_pars
 from data import orm
 from data.FSMbot.FSMadmin import FiltersFSM
 

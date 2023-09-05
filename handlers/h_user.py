@@ -1,15 +1,16 @@
-from aiogram import Router, types, F
+from aiogram import Router, types, F, Bot
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 
 from keyboards.kb_user import kb_main_user
 from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile, gen_markup_users_tariff, \
     gen_markup_replenishes
-from keyboards.ikb_admin import gen_markup_cancel_fsm
+from keyboards.ikb_admin import gen_markup_cancel_fsm, gen_markup_ok_pay
 from filters.my_filter import UserFilt
 from data import orm
 from data.FSMbot.FSMusers import ChequeFSM
 from data.orm import ADMIN_ID
+from create_bot import bot
 
 router: Router = Router()
 
@@ -36,7 +37,7 @@ async def user_products(msg: types.Message):
                                                                         len(all_product),
                                                                         page_number=page_number))
     else:
-        await msg.answer(text=f'У вас нет сохранённых товаров', reply_markup=kb_main_user)
+        await msg.answer(text=f'У вас нет сохранённых товаров')
 
 
 @router.callback_query(lambda x: x.data.startswith('track'))
@@ -157,11 +158,18 @@ async def replenishes_account(callback: types.CallbackQuery):
 
 @router.callback_query(lambda x: x.data.startswith('pay'))
 async def replenishes_account(callback: types.CallbackQuery, state: FSMContext):
-    """Добавление нового тарифа старт FSM"""
+    """Обрабатывает кнопку оплачено старт FSM ожидает подтверждения платежа"""
     await callback.message.answer(text='Пришлите подтверждение платежа', reply_markup=await gen_markup_cancel_fsm())
     await state.set_state(ChequeFSM.screen_cheque)
 
+
 @router.message(ChequeFSM.screen_cheque)
 async def sends_payment_receipt(msg: types.Message, state: FSMContext):
+    """Принимает у пользователя подтверждение оплаты и отправляет админу
+     копию сообщения и сообщение с кнопками подтверждения оплаты"""
     await msg.forward(chat_id=ADMIN_ID)
+    await bot.send_message(chat_id=ADMIN_ID, text=f'Пополнение баланса.\n'
+                                                  f'Пользователь {msg.from_user.first_name}\n'
+                                                  f'ID{msg.from_user.id}',
+                           reply_markup=await gen_markup_ok_pay(msg.from_user.id))
     await state.clear()

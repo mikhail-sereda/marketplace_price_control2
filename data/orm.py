@@ -68,6 +68,14 @@ def db_get_user_product(id_user):
         return all_prod
 
 
+def db_get_all_product():
+    """Отдаёт все товары"""
+    with Session() as session:
+        all_prod = session.query(UserProduct).filter(
+            UserProduct.valve == 1).all()
+        return all_prod
+
+
 def db_get_count_product_user(id_user):
     """Отдаёт количество товаров пользователя па id user"""
     with Session() as session:

@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+import threading
+
 import requests
 from fake_useragent import UserAgent
+import asyncio
+
+from data import orm
 
 url_get = 'https://card.wb.ru/cards/detail?spp=0&regions=80,4,38,70,69,86,30,40,48,1,' \
           '112&pricemarginCoeff=1&reg=0&appType=1&emp=0&locale=ru&lang=ru&curr=rub&couponsGeo=' \
@@ -91,3 +96,28 @@ def parsing_evry_day(url):
     a = generates_link_request(id_all)
     all_bd = (selects_values(a))
     return all_bd
+
+
+def parsing_all():
+    all_product = orm.db_get_all_product()
+    for i in all_product:
+        headers = {'User-Agent': UserAgent().chrome}
+        url_get_user = url_get + str(i.id_prod)
+        req = requests.get(url_get_user, headers)
+        js_dict = req.json()
+        try:
+            price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
+        except KeyError:
+            price = js_dict['data']['products'][0]['priceU'] / 100
+        if i.price != price:
+            print(price)
+
+
+async def parsing_price_thread(wait_for):
+    """Запускает новый поток для парсинга"""
+    while True:
+        await asyncio.sleep(wait_for)
+        parsing = threading.Thread(target=parsing_all)
+        parsing.start()
+
+
