@@ -89,6 +89,17 @@ def db_get_profile(id_user):
         return session.query(User).filter(User.user_id == id_user).first()
 
 
+def db_corrected_price(id_prod, price, min_price=None):
+    with Session() as session:
+        one_prod = session.query(UserProduct).filter(UserProduct.id == id_prod).first()
+        if min_price:
+            one_prod.price = price
+            one_prod.min_price = min_price
+        else:
+            one_prod.price = price
+        session.commit()
+
+
 def db_dell_product(id_rec):
     with Session() as session:
         record_to_delete = session.query(UserProduct).filter(UserProduct.id == id_rec).first()

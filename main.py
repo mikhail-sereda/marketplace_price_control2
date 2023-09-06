@@ -12,7 +12,7 @@ async def main() -> None:
     dp.include_router(h_other.router)
     await bot.delete_webhook(drop_pending_updates=True)
     loop = asyncio.get_event_loop()
-    loop.create_task(parsing_price_thread(1))
+    loop.create_task(parsing_price_thread(10))
     await dp.start_polling(bot)
 
 

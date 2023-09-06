@@ -90,27 +90,22 @@ def all_pars(id_all):
     return all_bd
 
 
-def parsing_evry_day(url):
-    """проверка изменения цены"""
-    id_all = defines_product_id(url)
-    a = generates_link_request(id_all)
-    all_bd = (selects_values(a))
-    return all_bd
-
-
 def parsing_all():
-    all_product = orm.db_get_all_product()
+    """Парсит цены и сравнивает их с ценой и мин ценой в БД. Если изменено перезаписывает"""
+    all_product = orm.db_get_all_product() #только активные продукты
+    headers = {'User-Agent': UserAgent().chrome}
     for i in all_product:
-        headers = {'User-Agent': UserAgent().chrome}
-        url_get_user = url_get + str(i.id_prod)
-        req = requests.get(url_get_user, headers)
+        url_get_prod = url_get + str(i.id_prod)
+        req = requests.get(url_get_prod, headers)
         js_dict = req.json()
         try:
             price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
         except KeyError:
             price = js_dict['data']['products'][0]['priceU'] / 100
-        if i.price != price:
-            print(price)
+        if i.price != price and i.min_price <= price:
+            orm.db_corrected_price(id_prod=i.id, price=price)
+        elif i.price != price and i.min_price > price:
+            orm.db_corrected_price(id_prod=i.id, price=price, min_price=price)
 
 
 async def parsing_price_thread(wait_for):
