@@ -31,6 +31,7 @@ class UserProduct(Base):
     start_price = Column(Float, nullable=False)
     min_price = Column(Float, nullable=False)
     price = Column(Float, nullable=False)
+    pars_price = Column(Float, nullable=False)
     photo_link = Column(String, nullable=False)
     link = Column(String, nullable=False)
     valve = Column(Integer, default=1, nullable=False)

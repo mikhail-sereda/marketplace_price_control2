@@ -2,12 +2,14 @@ from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from keyboards.kb_admin import kb_main_admin
 from keyboards.ikb_admin import gen_markup_category_tariff, gen_markup_cancel_fsm, gen_markup_menu_tariff
 from filters.my_filter import AdmFilter
 from data import orm
-from data.FSMbot.FSMadmin import FiltersFSM
+from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM
+from create_bot import bot
 
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
@@ -109,6 +111,32 @@ async def add_tariff_3(msg: types.Message, state: FSMContext):
         await state.clear()
     else:
         await msg.answer(text='Сообщение должно содержать только цифры.')
+
+
+@router.callback_query(lambda x: x.data.startswith('ok_pay'))
+async def start_fsm_add_money(callback: types.CallbackQuery, state: FSMContext):
+    """Обрабатывает кнопку пополнить бланс старт FSM ожидает сумму"""
+    inl_col = callback.data.split(':')
+    await callback.message.edit_reply_markup(inline_message_id=callback.id,
+                                             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                                                 [InlineKeyboardButton(text=f'Отмена оплаты',
+                                                                       callback_data=f'no_pay:{int(inl_col[1])}')]]))
+    await callback.message.answer(text='Укажи сумму пополнения баланса', reply_markup=await gen_markup_cancel_fsm())
+    await state.set_state(AddMoneyFSM.amount_money)
+    await state.update_data(user_id=int(inl_col[1]))
+
+
+@router.message(AddMoneyFSM.amount_money)
+async def increase_user_balance(msg: types.Message, state: FSMContext):
+    """Принимает сумму и пополняет баланс пользователю"""
+    id_user = await state.get_data()
+    print(id_user)
+    orm.db_increase_user_balance(user_id=id_user['user_id'],
+                                 balance=float(msg.text))
+    # await msg.forward(chat_id=ADMIN_ID)
+    await bot.send_message(chat_id=id_user['user_id'], text=f'Пополнение баланса.\n'
+                                                 f'Ваш баланс пополнен на {msg.text} руб.\n')
+    await state.clear()
 
 
 @router.callback_query(lambda x: x.data.startswith('cancelFSM'))

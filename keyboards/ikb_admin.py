@@ -29,7 +29,7 @@ async def gen_markup_menu_tariff(tariff_id, active_index=1):
 
 
 async def gen_markup_ok_pay(user_id):
-    """Создаёт инлайн кнопку оплачено"""
+    """Создаёт инлайн кнопки"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f'Пополнить баланс', callback_data=f'ok_pay:{user_id}')],
         [InlineKeyboardButton(text=f'Отмена оплаты', callback_data=f'no_pay:{user_id}')]])

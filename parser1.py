@@ -5,6 +5,7 @@ import requests
 from fake_useragent import UserAgent
 import asyncio
 
+from create_bot import bot
 from data import orm
 
 url_get = 'https://card.wb.ru/cards/detail?spp=0&regions=80,4,38,70,69,86,30,40,48,1,' \
@@ -77,9 +78,9 @@ def selects_values(js_dict):
     dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
     dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
     try:
-        dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU']/100
+        dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
     except KeyError:
-        dict_bd['price'] = js_dict['data']['products'][0]['priceU']/100
+        dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
     return dict_bd
 
 
@@ -92,7 +93,7 @@ def all_pars(id_all):
 
 def parsing_all():
     """Парсит цены и сравнивает их с ценой и мин ценой в БД. Если изменено перезаписывает"""
-    all_product = orm.db_get_all_product() #только активные продукты
+    all_product = orm.db_get_all_product()  # только активные продукты
     headers = {'User-Agent': UserAgent().chrome}
     for i in all_product:
         url_get_prod = url_get + str(i.id_prod)
@@ -102,10 +103,49 @@ def parsing_all():
             price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
         except KeyError:
             price = js_dict['data']['products'][0]['priceU'] / 100
-        if i.price != price and i.min_price <= price:
-            orm.db_corrected_price(id_prod=i.id, price=price)
-        elif i.price != price and i.min_price > price:
-            orm.db_corrected_price(id_prod=i.id, price=price, min_price=price)
+        if i.pars_price != price:
+            orm.db_adjusts_pars_price(id_prod=i.id, price=price)
+            print('ok', price)
+    print('parsing ok')
+
+
+async def sends_price_change_message():
+    """Проверяет цену после парсинга с сохранёнными ценами, если цена снижена относительно стартовой сообщает пользователя
+    если выше статовой, то перезаписывает текущую цену"""
+    mod_products = orm.db_get_modified_products()
+    for product in mod_products:
+        if product.pars_price >= product.start_price and product.pars_price != product.price:
+            orm.db_adjusts_price(id_prod=product.id,
+                                 price=product.pars_price)
+
+        elif product.start_price > product.pars_price > product.price:
+            orm.db_adjusts_price(id_prod=product.id,
+                                 price=product.pars_price)
+        elif product.pars_price < product.start_price \
+                and product.pars_price < product.price \
+                and product.pars_price < product.min_price:
+            orm.db_adjusts_price(id_prod=product.id,
+                                 price=product.pars_price,
+                                 min_price=product.pars_price)
+            await bot.send_photo(chat_id=product.user_id,
+                                 photo=product.photo_link,
+                                 caption=f'<a href="{product.link}"><b>{product.name_prod}</b></a>\n\n'
+                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%'                            
+                                         f'<b>Начальная цена: </b>{product.start_price} руб.\n'
+                                         f'<b>Минимальная цена: </b>{product.min_price} руб.\n'
+                                         f'<b>Текущая цена: </b>{product.pars_price} руб.\n'
+                                         f'Цена минимальная с момента отслеживания')
+        elif product.start_price > product.pars_price >= product.min_price \
+                and product.pars_price < product.price:
+            orm.db_adjusts_price(id_prod=product.id,
+                                 price=product.pars_price)
+            await bot.send_photo(chat_id=product.user_id,
+                                 photo=product.photo_link,
+                                 caption=f'<a href="{product.link}"><b>{product.name_prod}</b></a>\n\n'
+                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%'
+                                         f'<b>Начальная цена: </b>{product.start_price} руб.\n'
+                                         f'<b>Минимальная цена: </b>{product.min_price} руб.\n'
+                                         f'<b>Текущая цена: </b>{product.pars_price} руб.')
 
 
 async def parsing_price_thread(wait_for):
@@ -114,5 +154,5 @@ async def parsing_price_thread(wait_for):
         await asyncio.sleep(wait_for)
         parsing = threading.Thread(target=parsing_all)
         parsing.start()
-
+        await sends_price_change_message()
 

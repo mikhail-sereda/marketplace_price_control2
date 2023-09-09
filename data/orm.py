@@ -45,6 +45,15 @@ def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int, b
         session.commit()
 
 
+def db_increase_user_balance(user_id: int, balance: float):
+    """Изменяет тариф у пользователя"""
+    with Session() as session:
+        one_user = session.query(User).filter(User.user_id == user_id).first()
+        one_user.balance = one_user.balance + balance
+        one_user.all_many = one_user.all_many + balance
+        session.commit()
+
+
 def db_add_product(product: dict):
     """добавляет новый товар и возвращает True, если пользователь уже следит за товаром возвращает False"""
     with Session() as session:
@@ -69,11 +78,19 @@ def db_get_user_product(id_user):
 
 
 def db_get_all_product():
-    """Отдаёт все товары"""
+    """Отдаёт все активные товары"""
     with Session() as session:
         all_prod = session.query(UserProduct).filter(
             UserProduct.valve == 1).all()
         return all_prod
+
+
+def db_get_modified_products():
+    """Отдаёт все активные товары с изменённой ценой"""
+    with Session() as session:
+        mod_products = session.query(UserProduct).filter(
+            UserProduct.price != UserProduct.pars_price).all()
+        return mod_products
 
 
 def db_get_count_product_user(id_user):
@@ -89,7 +106,8 @@ def db_get_profile(id_user):
         return session.query(User).filter(User.user_id == id_user).first()
 
 
-def db_corrected_price(id_prod, price, min_price=None):
+def db_adjusts_price(id_prod, price, min_price=None):
+    """корректирует текущую цену и минимальную после сообщения пользователю об изменении цены"""
     with Session() as session:
         one_prod = session.query(UserProduct).filter(UserProduct.id == id_prod).first()
         if min_price:
@@ -97,6 +115,14 @@ def db_corrected_price(id_prod, price, min_price=None):
             one_prod.min_price = min_price
         else:
             one_prod.price = price
+        session.commit()
+
+
+def db_adjusts_pars_price(id_prod, price):
+    """Обновляет текущую цену после парсинга"""
+    with Session() as session:
+        one_prod = session.query(UserProduct).filter(UserProduct.id == id_prod).first()
+        one_prod.pars_price = price
         session.commit()
 
 
