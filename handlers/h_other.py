@@ -3,7 +3,8 @@ from aiogram.filters import CommandStart
 
 from keyboards.kb_user import kb_main_user
 from data import orm
-from parser1 import img_by_id, all_pars
+from utils.parser1 import img_by_id, all_pars
+from filters.my_filter import CheckTariff
 
 router: Router = Router()
 
@@ -26,7 +27,7 @@ async def useful(msg: types.Message):
     await msg.answer(text=f'Ссылки на полезные ресурсы', reply_markup=kb_main_user)
 
 
-@router.message()
+@router.message(CheckTariff())
 async def parsing_link(msg: types.Message):
     """Получает ссылку на wildber выбирает id передаёт парсеру и записывает в бд"""
     product_dict = {'user_id': msg.from_user.id, 'link': msg.text}

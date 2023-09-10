@@ -1,4 +1,4 @@
-from aiogram import Router, types, F
+from aiogram import Router, types, F, Bot
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 
@@ -11,6 +11,7 @@ from data import orm
 from data.FSMbot.FSMusers import ChequeFSM
 from data.orm import ADMIN_ID
 from create_bot import bot
+from static.caption import creating_caption_product
 
 router: Router = Router()
 
@@ -29,10 +30,11 @@ async def user_products(msg: types.Message):
     if all_product:
         page_number = 0
         await msg.answer_photo(photo=all_product[page_number].photo_link,
-                               caption=f'<a href="{all_product[page_number].link}"><b>{all_product[page_number].name_prod}</b></a>\n\n'
-                                       f'<b>Начальная цена: </b>{all_product[page_number].start_price} руб.\n'
-                                       f'<b>Минимальная цена: </b>{all_product[page_number].min_price} руб.\n'
-                                       f'<b>Текущая цена: </b>{all_product[page_number].price} руб.',
+                               caption=creating_caption_product(link=all_product[page_number].link,
+                                                                link_text=all_product[page_number].name_prod,
+                                                                start_price=all_product[page_number].start_price,
+                                                                min_price=all_product[page_number].min_price,
+                                                                price=all_product[page_number].price),
                                reply_markup=await gen_markup_pagination(str(all_product[page_number].id),
                                                                         len(all_product),
                                                                         page_number=page_number))
@@ -47,10 +49,11 @@ async def product_pagination(callback: types.CallbackQuery):
     all_product = orm.db_get_user_product(callback.from_user.id)
     page_number = int(inl_col[1])
     photo = types.InputMediaPhoto(media=all_product[page_number].photo_link,
-                                  caption=f'<a href="{all_product[page_number].link}"><b>{all_product[page_number].name_prod}</b></a>\n\n'
-                                          f'<b>Начальная цена: </b>{all_product[page_number].start_price} руб.\n'
-                                          f'<b>Минимальная цена: </b>{all_product[page_number].min_price} руб.\n'
-                                          f'<b>Текущая цена: </b>{all_product[page_number].price} руб.')
+                                  caption=creating_caption_product(link=all_product[page_number].link,
+                                                                   link_text=all_product[page_number].name_prod,
+                                                                   start_price=all_product[page_number].start_price,
+                                                                   min_price=all_product[page_number].min_price,
+                                                                   price=all_product[page_number].price))
 
     await callback.message.edit_media(media=photo,
                                       reply_markup=await gen_markup_pagination(
@@ -79,10 +82,11 @@ async def del_product(callback: types.CallbackQuery):
     page_number = int(inl_col[2])
     await callback.answer(text=f'Кнопка', reply_markup=kb_main_user)
     photo = types.InputMediaPhoto(media=all_product[page_number].photo_link,
-                                  caption=f'<a href="{all_product[page_number].link}"><b>{all_product[page_number].name_prod}</b></a>\n\n'
-                                          f'<b>Начальная цена: </b>{all_product[page_number].start_price} руб.\n'
-                                          f'<b>Минимальная цена: </b>{all_product[page_number].min_price} руб.\n'
-                                          f'<b>Текущая цена: </b>{all_product[page_number].price} руб.')
+                                  caption=creating_caption_product(link=all_product[page_number].link,
+                                                                   link_text=all_product[page_number].name_prod,
+                                                                   start_price=all_product[page_number].start_price,
+                                                                   min_price=all_product[page_number].min_price,
+                                                                   price=all_product[page_number].price))
     await callback.message.edit_media(media=photo,
                                       reply_markup=await gen_markup_pagination(str(all_product[page_number].id),
                                                                                len(all_product),

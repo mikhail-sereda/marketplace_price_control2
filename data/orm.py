@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
@@ -46,12 +46,23 @@ def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int, b
 
 
 def db_increase_user_balance(user_id: int, balance: float):
-    """Изменяет тариф у пользователя"""
+    """Изменяет баланс у пользователя"""
     with Session() as session:
         one_user = session.query(User).filter(User.user_id == user_id).first()
         one_user.balance = one_user.balance + balance
         one_user.all_many = one_user.all_many + balance
         session.commit()
+
+
+def db_get_all_users():
+    """Отдаёт всex пользователей"""
+    with Session() as session:
+        filter_after = datetime.now() - timedelta(days=182)
+        print(filter_after)
+
+        users = session.query(User).filter(User.tariff_user_date < filter_after,
+                                           User.tariff_user != 'Стандартный').all()
+        return users
 
 
 def db_add_product(product: dict):

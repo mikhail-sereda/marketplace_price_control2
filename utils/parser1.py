@@ -7,6 +7,7 @@ import asyncio
 
 from create_bot import bot
 from data import orm
+from static.caption import creating_caption_product
 
 url_get = 'https://card.wb.ru/cards/detail?spp=0&regions=80,4,38,70,69,86,30,40,48,1,' \
           '112&pricemarginCoeff=1&reg=0&appType=1&emp=0&locale=ru&lang=ru&curr=rub&couponsGeo=' \
@@ -105,8 +106,6 @@ def parsing_all():
             price = js_dict['data']['products'][0]['priceU'] / 100
         if i.pars_price != price:
             orm.db_adjusts_pars_price(id_prod=i.id, price=price)
-            print('ok', price)
-    print('parsing ok')
 
 
 async def sends_price_change_message():
@@ -114,6 +113,11 @@ async def sends_price_change_message():
     если выше статовой, то перезаписывает текущую цену"""
     mod_products = orm.db_get_modified_products()
     for product in mod_products:
+        caption = creating_caption_product(link=product.link,
+                                           link_text=product.name_prod,
+                                           start_price=product.start_price,
+                                           min_price=product.min_price,
+                                           price=product.pars_price)
         if product.pars_price >= product.start_price and product.pars_price != product.price:
             orm.db_adjusts_price(id_prod=product.id,
                                  price=product.pars_price)
@@ -129,11 +133,8 @@ async def sends_price_change_message():
                                  min_price=product.pars_price)
             await bot.send_photo(chat_id=product.user_id,
                                  photo=product.photo_link,
-                                 caption=f'<a href="{product.link}"><b>{product.name_prod}</b></a>\n\n'
-                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%'                            
-                                         f'<b>Начальная цена: </b>{product.start_price} руб.\n'
-                                         f'<b>Минимальная цена: </b>{product.min_price} руб.\n'
-                                         f'<b>Текущая цена: </b>{product.pars_price} руб.\n'
+                                 caption=f'{caption}\n\n'
+                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%\n'
                                          f'Цена минимальная с момента отслеживания')
         elif product.start_price > product.pars_price >= product.min_price \
                 and product.pars_price < product.price:
@@ -141,11 +142,8 @@ async def sends_price_change_message():
                                  price=product.pars_price)
             await bot.send_photo(chat_id=product.user_id,
                                  photo=product.photo_link,
-                                 caption=f'<a href="{product.link}"><b>{product.name_prod}</b></a>\n\n'
-                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%'
-                                         f'<b>Начальная цена: </b>{product.start_price} руб.\n'
-                                         f'<b>Минимальная цена: </b>{product.min_price} руб.\n'
-                                         f'<b>Текущая цена: </b>{product.pars_price} руб.')
+                                 caption=f'{caption}\n\n'
+                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%\n')
 
 
 async def parsing_price_thread(wait_for):
