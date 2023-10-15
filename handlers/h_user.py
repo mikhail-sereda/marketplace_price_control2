@@ -65,7 +65,7 @@ async def product_pagination(callback: types.CallbackQuery):
 
 @router.callback_query(lambda x: x.data.startswith('delall'))
 async def del_all_product(callback: types.CallbackQuery):
-    """Удаление последнего товара"""
+    """обрабатывает кнопку Удаление товара при удалении последнего товара"""
     inl_col = callback.data.split(':')
     orm.db_dell_product(int(inl_col[1]))
     await callback.message.delete()
@@ -75,7 +75,7 @@ async def del_all_product(callback: types.CallbackQuery):
 
 @router.callback_query(lambda x: x.data.startswith('delpr'))
 async def del_product(callback: types.CallbackQuery):
-    """Удаление товара если в списке больше однго товара"""
+    """обрабатывает кнопку Удаление товара если в списке больше однго товара"""
     inl_col = callback.data.split(':')
     orm.db_dell_product(int(inl_col[1]))  # удаляет товар из бд
     all_product = orm.db_get_user_product(callback.from_user.id)
