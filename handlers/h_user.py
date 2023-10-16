@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.kb_user import kb_main_user
 from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile, gen_markup_users_tariff, \
-    gen_markup_replenishes
+    gen_markup_replenishes, gen_markup_consent
 from keyboards.ikb_admin import gen_markup_cancel_fsm, gen_markup_ok_pay
 from filters.my_filter import UserFilt
 from data import orm
@@ -94,7 +94,6 @@ async def del_product(callback: types.CallbackQuery):
     await callback.answer()
 
 
-
 @router.message(F.text == 'Профиль')
 async def get_user_profile(msg: types.Message):
     """Кнопка Профиль"""
@@ -140,12 +139,29 @@ async def connects_tariff(callback: types.CallbackQuery):
         await callback.message.answer(f'У вас недостаточно средств на счету.', reply_markup=await gen_markup_profile())
         await callback.answer()
     else:
+        await callback.message.answer(text=f'Ваш текущий тариф {profile_user.tariff_user}\n'
+                                           f'Отслеживается {profile_user.tracked_items} ссылок.\n\n'
+                                           f'Подключить тариф {tariff.name_tariff}?\n'
+                                           f'Вы сможете отслеживать до {tariff.tracked_items} ссылок',
+                                      reply_markup=await gen_markup_consent(tariff.id))
+
+
+@router.callback_query(lambda x: x.data.startswith('t_change'))
+async def confirms_tariff(callback: types.CallbackQuery):
+    """Обработка кнопок подтверждения изменения тарифа."""
+    inl_col = callback.data.split(':')
+    if int(inl_col[1]):
+        tariff = orm.db_get_one_tariff(int(inl_col[2]))
+        profile_user = orm.db_get_profile(callback.from_user.id)
         orm.db_changes_user_tariff(name_tariff=tariff.name_tariff,
                                    id_user=callback.from_user.id,
                                    tracked_items=tariff.tracked_items,
                                    balance=profile_user.balance - tariff.price_tariff)
-        await callback.answer(text=f'Вы подключили тариф {tariff.name_tariff}.\n'
-                                   f'Вы можете отслеживать до {tariff.tracked_items} ссылок')
+        await callback.answer(text=f'Тариф {tariff.name_tariff} успешно подключен.\n'
+                                           f'Вы можете отслеживать до {tariff.tracked_items} ссылок', show_alert=True)
+        await callback.message.delete()
+    else:
+        await callback.message.delete()
 
 
 @router.callback_query(lambda x: x.data.startswith('money'))

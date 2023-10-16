@@ -56,3 +56,10 @@ async def gen_markup_replenishes(user_id):
     """Создаёт инлайн кнопку оплачено"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f'Оплачено', callback_data=f'pay:{user_id}')]])
+
+
+async def gen_markup_consent(tariff_id):
+    """Создаёт инлайн кнопки Подключить, Не подключать"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f'Подключить', callback_data=f't_change:1:{tariff_id}'),
+         InlineKeyboardButton(text=f'Не подключать', callback_data='t_change:0:')]])
