@@ -75,7 +75,7 @@ async def del_all_product(callback: types.CallbackQuery):
 
 @router.callback_query(lambda x: x.data.startswith('delpr'))
 async def del_product(callback: types.CallbackQuery):
-    """обрабатывает кнопку Удаление товара если в списке больше однго товара"""
+    """Обрабатывает кнопку Удаление товара если в списке больше однго товара"""
     inl_col = callback.data.split(':')
     orm.db_dell_product(int(inl_col[1]))  # удаляет товар из бд
     all_product = orm.db_get_user_product(callback.from_user.id)
@@ -92,6 +92,7 @@ async def del_product(callback: types.CallbackQuery):
                                                                                len(all_product),
                                                                                page_number=page_number))
     await callback.answer()
+
 
 
 @router.message(F.text == 'Профиль')

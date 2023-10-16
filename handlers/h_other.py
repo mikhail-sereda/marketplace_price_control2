@@ -5,7 +5,7 @@ from keyboards.kb_user import kb_main_user
 from data import orm
 from utils.parser1 import img_by_id, all_pars
 from filters.my_filter import CheckTariff
-
+from static.caption import creating_caption_product
 router: Router = Router()
 
 
@@ -45,7 +45,12 @@ async def parsing_link(msg: types.Message):
     img_link = img_by_id(id_prod)
     product_dict['photo_link'] = img_link
     if orm.db_add_product(product_dict):
-        await msg.answer_photo(photo=img_link, caption=prod_info['name_prod'])
+        await msg.answer_photo(photo=img_link,
+                               caption=creating_caption_product(link=product_dict['link'],
+                                                                link_text=product_dict['name_prod'],
+                                                                start_price=product_dict['min_price'],
+                                                                min_price=product_dict['start_price'],
+                                                                price=product_dict['pars_price']))
     else:
         await msg.answer(text='Ссылка уже отслеживается')
 
