@@ -8,7 +8,8 @@ def creating_caption_product(link, link_text, start_price, min_price, price):
 
 
 def creating_text_help():
-    pass
+    caption = f''
+    return caption
 
 
 def creating_text_useful():

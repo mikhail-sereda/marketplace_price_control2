@@ -26,8 +26,9 @@ def db_add_user(user_id):
             new_user = User(user_id=user_id)
             session.add(new_user)
             session.commit()
-
-
+        else:
+            db_changes_user_activ(id_user=user_id, activ=1)
+            session.commit()
 def db_my_filter_user(user_id: int):
     with Session() as session:
         user1 = session.query(User).filter(User.user_id == user_id).first()
@@ -43,6 +44,16 @@ def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int, b
         one_user.tariff_user_date = datetime.now()
         one_user.balance = balance
         session.commit()
+
+
+def db_changes_user_activ(id_user: int, activ: int):
+    """Изменяет активность у пользователя. 0 не активный, 1 активный"""
+    print(id_user, activ)
+    with Session() as session:
+        one_user = session.query(User).filter(User.user_id == id_user).first()
+        one_user.activ = activ
+        session.commit()
+
 
 
 def db_increase_user_balance(user_id: int, balance: float):

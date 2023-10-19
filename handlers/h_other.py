@@ -32,7 +32,7 @@ async def parsing_link(msg: types.Message):
     """Получает ссылку на wildber выбирает id передаёт парсеру и записывает в бд"""
     product_dict = {'user_id': msg.from_user.id, 'link': msg.text}
     url_list = msg.text.split('/')
-    id_prod = filter(lambda x: x.isnumeric(), url_list)
+    id_prod = filter(lambda x: x.isnumeric(), url_list)  # список строк состоящих из цифр из переданного сообщенния
     try:
         id_prod = list(id_prod)[0]
     except IndexError:

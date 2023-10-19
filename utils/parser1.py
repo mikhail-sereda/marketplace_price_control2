@@ -131,19 +131,26 @@ async def sends_price_change_message():
             orm.db_adjusts_price(id_prod=product.id,
                                  price=product.pars_price,
                                  min_price=product.pars_price)
-            await bot.send_photo(chat_id=product.user_id,
-                                 photo=product.photo_link,
-                                 caption=f'{caption}\n\n'
-                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%\n'
-                                         f'Цена минимальная с момента отслеживания')
+            try:
+                await bot.send_photo(chat_id=product.user_id,
+                                     photo=product.photo_link,
+                                     caption=f'{caption}\n\n'
+                                             f'Цена снижена на {100 - ((product.pars_price * 100) // product.start_price)}%\n'
+                                             f'Цена минимальная с момента отслеживания')
+            except:
+                orm.db_changes_user_activ(id_user=product.user_id, activ=0)
+
         elif product.start_price > product.pars_price >= product.min_price \
                 and product.pars_price < product.price:
             orm.db_adjusts_price(id_prod=product.id,
                                  price=product.pars_price)
-            await bot.send_photo(chat_id=product.user_id,
-                                 photo=product.photo_link,
-                                 caption=f'{caption}\n\n'
-                                         f'Цена снижена на {100-((product.pars_price*100)//product.start_price)}%\n')
+            try:
+                await bot.send_photo(chat_id=product.user_id,
+                                     photo=product.photo_link,
+                                     caption=f'{caption}\n\n'
+                                             f'Цена снижена на {100 - ((product.pars_price * 100) // product.start_price)}%\n')
+            except:
+                orm.db_changes_user_activ(id_user=product.user_id, activ=0)
 
 
 async def parsing_price_thread(wait_for):
@@ -153,4 +160,3 @@ async def parsing_price_thread(wait_for):
         parsing = threading.Thread(target=parsing_all)
         parsing.start()
         await sends_price_change_message()
-
