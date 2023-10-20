@@ -26,7 +26,8 @@ async def start_user(msg: types.Message):
 @router.message(F.text == 'Мои товары')
 async def user_products(msg: types.Message):
     """Кнопка Мои товары"""
-    all_product = orm.db_get_user_product(msg.from_user.id)
+    tracked_items = orm.db_get_tracked_items(msg.from_user.id)
+    all_product = orm.db_get_user_product(msg.from_user.id)[0:tracked_items]
     if all_product:
         page_number = 0
         await msg.answer_photo(photo=all_product[page_number].photo_link,
@@ -46,7 +47,8 @@ async def user_products(msg: types.Message):
 async def product_pagination(callback: types.CallbackQuery):
     """Обработка кнопокки пагинации моих товаров"""
     inl_col = callback.data.split(':')
-    all_product = orm.db_get_user_product(callback.from_user.id)
+    tracked_items = orm.db_get_tracked_items(callback.from_user.id)
+    all_product = orm.db_get_user_product(callback.from_user.id)[0:tracked_items]
     page_number = int(inl_col[1])
     photo = types.InputMediaPhoto(media=all_product[page_number].photo_link,
                                   caption=creating_caption_product(link=all_product[page_number].link,
@@ -78,7 +80,8 @@ async def del_product(callback: types.CallbackQuery):
     """Обрабатывает кнопку Удаление товара если в списке больше однго товара"""
     inl_col = callback.data.split(':')
     orm.db_dell_product(int(inl_col[1]))  # удаляет товар из бд
-    all_product = orm.db_get_user_product(callback.from_user.id)
+    tracked_items = orm.db_get_tracked_items(callback.from_user.id)
+    all_product = orm.db_get_user_product(callback.from_user.id)[0:tracked_items]
     page_number = int(inl_col[2])
     await callback.answer(text=f'Кнопка', reply_markup=kb_main_user)
     photo = types.InputMediaPhoto(media=all_product[page_number].photo_link,
@@ -140,7 +143,7 @@ async def connects_tariff(callback: types.CallbackQuery):
         await callback.answer()
     else:
         await callback.message.answer(text=f'Ваш текущий тариф {profile_user.tariff_user}\n'
-                                           f'Отслеживается {profile_user.tracked_items} ссылок.\n\n'
+                                           f'Можно отслеживать до {profile_user.tracked_items} ссылок.\n\n'
                                            f'Подключить тариф {tariff.name_tariff}?\n'
                                            f'Вы сможете отслеживать до {tariff.tracked_items} ссылок',
                                       reply_markup=await gen_markup_consent(tariff.id))

@@ -29,9 +29,11 @@ def db_add_user(user_id):
         else:
             db_changes_user_activ(id_user=user_id, activ=1)
             session.commit()
+
+
 def db_my_filter_user(user_id: int):
     with Session() as session:
-        user1 = session.query(User).filter(User.user_id == user_id).first()
+        user1 = session.query(User).filter(User.user_id == user_id, User.activ == 1).first()
         return bool(user1)
 
 
@@ -55,7 +57,6 @@ def db_changes_user_activ(id_user: int, activ: int):
         session.commit()
 
 
-
 def db_increase_user_balance(user_id: int, balance: float):
     """Изменяет баланс у пользователя"""
     with Session() as session:
@@ -68,12 +69,19 @@ def db_increase_user_balance(user_id: int, balance: float):
 def db_get_all_users():
     """Отдаёт всex пользователей"""
     with Session() as session:
-        filter_after = datetime.now() - timedelta(days=182)
+        filter_after = datetime.now() - timedelta(days=180)
         print(filter_after)
 
         users = session.query(User).filter(User.tariff_user_date < filter_after,
                                            User.tariff_user != 'Стандартный').all()
         return users
+
+def db_get_tracked_items(user_id):
+    """Отает количество ссылок для отслеживания пользователю"""
+    with Session() as session:
+        items = session.query(User.tracked_items).filter(User.user_id == user_id).first()
+        print(items)
+        return items[0]
 
 
 def db_add_product(product: dict):

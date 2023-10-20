@@ -6,6 +6,7 @@ from data import orm
 from utils.parser1 import img_by_id, all_pars
 from filters.my_filter import CheckTariff, CheckLink
 from static.caption import creating_caption_product
+
 router: Router = Router()
 
 
@@ -16,12 +17,13 @@ async def start_other(msg: types.Message):
     await msg.answer(text=f'Привет {msg.from_user.first_name}', reply_markup=kb_main_user)
 
 
-@router.message(F.text=='Помощь')
+@router.message(F.text == 'Помощь')
 async def help_all(msg: types.Message):
-    """Обрабатывает кнопку помощь для всех пользователей"""    
+    """Обрабатывает кнопку помощь для всех пользователей"""
     await msg.answer(text=f'Помощь {msg.from_user.first_name}', reply_markup=kb_main_user)
 
-@router.message(F.text=='Полезное')
+
+@router.message(F.text == 'Полезное')
 async def useful(msg: types.Message):
     """Обрабатывает кнопку полезное для всех пользователей"""
     await msg.answer(text=f'Ссылки на полезные ресурсы', reply_markup=kb_main_user)
@@ -32,14 +34,15 @@ async def parsing_link(msg: types.Message):
     """Получает ссылку на wildber выбирает id передаёт парсеру и записывает в бд"""
     product_dict = {'user_id': msg.from_user.id, 'link': msg.text}
     url_list = msg.text.split('/')
-    id_prod = filter(lambda x: x.isnumeric(), url_list)  # список строк состоящих из цифр из переданного сообщенния
+    id_prod = list(
+        filter(lambda x: x.isnumeric(), url_list))  # список строк состоящих из цифр из переданного сообщенния
     try:
-        prod_info = all_pars(id_prod)
+        prod_info = all_pars(id_prod[0])
         product_dict.update(prod_info)
         product_dict['min_price'] = prod_info['price']
         product_dict['start_price'] = prod_info['price']
         product_dict['pars_price'] = prod_info['price']
-        img_link = img_by_id(id_prod)
+        img_link = img_by_id(id_prod[0])
         product_dict['photo_link'] = img_link
         if orm.db_add_product(product_dict):
             await msg.answer_photo(photo=img_link,
@@ -57,9 +60,4 @@ async def parsing_link(msg: types.Message):
 @router.message()
 async def processing_other_messages(msg: types.Message):
     """обрабатывает прочие сообщения"""
-    await msg.answer(text='Я вас не понимаю!!!')
-
-
-
-
-
+    await msg.answer(text=f'Я вас не понимаю!!!', reply_markup=kb_main_user)
