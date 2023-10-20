@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from keyboards.kb_user import kb_main_user
 from data import orm
 from utils.parser1 import img_by_id, all_pars
-from filters.my_filter import CheckTariff
+from filters.my_filter import CheckTariff, CheckLink
 from static.caption import creating_caption_product
 router: Router = Router()
 
@@ -27,32 +27,38 @@ async def useful(msg: types.Message):
     await msg.answer(text=f'Ссылки на полезные ресурсы', reply_markup=kb_main_user)
 
 
-@router.message(CheckTariff())
+@router.message(CheckTariff(), CheckLink())
 async def parsing_link(msg: types.Message):
     """Получает ссылку на wildber выбирает id передаёт парсеру и записывает в бд"""
     product_dict = {'user_id': msg.from_user.id, 'link': msg.text}
     url_list = msg.text.split('/')
     id_prod = filter(lambda x: x.isnumeric(), url_list)  # список строк состоящих из цифр из переданного сообщенния
     try:
-        id_prod = list(id_prod)[0]
-    except IndexError:
+        prod_info = all_pars(id_prod)
+        product_dict.update(prod_info)
+        product_dict['min_price'] = prod_info['price']
+        product_dict['start_price'] = prod_info['price']
+        product_dict['pars_price'] = prod_info['price']
+        img_link = img_by_id(id_prod)
+        product_dict['photo_link'] = img_link
+        if orm.db_add_product(product_dict):
+            await msg.answer_photo(photo=img_link,
+                                   caption=creating_caption_product(link=product_dict['link'],
+                                                                    link_text=product_dict['name_prod'],
+                                                                    start_price=product_dict['min_price'],
+                                                                    min_price=product_dict['start_price'],
+                                                                    price=product_dict['pars_price']))
+        else:
+            await msg.answer(text='Ссылка уже отслеживается')
+    except:
         await msg.answer(text='Не верная ссылка')
-    prod_info = all_pars(id_prod)
-    product_dict.update(prod_info)
-    product_dict['min_price'] = prod_info['price']
-    product_dict['start_price'] = prod_info['price']
-    product_dict['pars_price'] = prod_info['price']
-    img_link = img_by_id(id_prod)
-    product_dict['photo_link'] = img_link
-    if orm.db_add_product(product_dict):
-        await msg.answer_photo(photo=img_link,
-                               caption=creating_caption_product(link=product_dict['link'],
-                                                                link_text=product_dict['name_prod'],
-                                                                start_price=product_dict['min_price'],
-                                                                min_price=product_dict['start_price'],
-                                                                price=product_dict['pars_price']))
-    else:
-        await msg.answer(text='Ссылка уже отслеживается')
+
+
+@router.message()
+async def processing_other_messages(msg: types.Message):
+    """обрабатывает прочие сообщения"""
+    await msg.answer(text='Я вас не понимаю!!!')
+
 
 
 

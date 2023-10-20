@@ -1,3 +1,5 @@
+import re
+
 from aiogram.filters import Filter
 from aiogram.types import Message
 
@@ -25,3 +27,9 @@ class CheckTariff(Filter):
             return False
         elif count_product < user.tracked_items:
             return True
+
+
+class CheckLink(Filter):
+    async def __call__(self, msg: Message):
+        a = re.compile(r'\S/wildberries.ru/catalog/\d+/\S')
+        return a.findall(msg.text)
