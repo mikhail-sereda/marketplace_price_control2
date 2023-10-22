@@ -81,6 +81,7 @@ async def del_product(callback: types.CallbackQuery):
     inl_col = callback.data.split(':')
     orm.db_dell_product(int(inl_col[1]))  # удаляет товар из бд
     tracked_items = orm.db_get_tracked_items(callback.from_user.id)
+    orm.db_disables_product_tracking(id_user=callback.from_user.id, tracked_items=tracked_items)
     all_product = orm.db_get_user_product(callback.from_user.id)[0:tracked_items]
     page_number = int(inl_col[2])
     await callback.answer(text=f'Кнопка', reply_markup=kb_main_user)
@@ -106,8 +107,9 @@ async def get_user_profile(msg: types.Message):
     await msg.answer(text=f'<b>___Профиль___</b>\n\n'
                           f'<b>Имя: </b>{msg.from_user.first_name}\n\n'
                           f'<b>ID: </b>{id_user}\n\n'
-                          f'<b>Количество товаров: </b>{count}\n\n'
-                          f'<b>Товаров отслеживается: </b>{profile_user.tracked_items}\n\n'
+                          f'<b>Количество ваших товаров: </b>{count}\n\n'
+                          f'<b>Товаров отслеживается: </b>'
+                          f'{profile_user.tracked_items if count >= profile_user.tracked_items else count}\n\n'
                           f'<b>Тариф: </b>{profile_user.tariff_user}\n\n'
                           f'<b>Баланс: </b>{profile_user.balance} руб.\n\n',
                      reply_markup=await gen_markup_profile())
@@ -117,15 +119,15 @@ async def get_user_profile(msg: types.Message):
 async def get_tariff_for_users(callback: types.CallbackQuery):
     """Показывает активные тарифы и кнопки подключения юзеру"""
     active_tariff = orm.db_get_tariffs(1)
-    text_fariffs = ''
+    text_tariffs = f'Срок действия тарифов 180 дней.\n{"➖" * 10}\n'
     name_tariffs = []
     for text in active_tariff:
-        text_fariffs += f'<b><u>{text.name_tariff}</u></b>\n\n' \
+        text_tariffs += f'<b><u>{text.name_tariff}</u></b>\n\n' \
                         f'До {text.tracked_items} ссылок\n' \
                         f'Стоимость {text.price_tariff} руб.\n' \
                         f'{"➖" * 10}\n'
         name_tariffs.append([text.name_tariff, text.id])
-    await callback.message.answer(text=text_fariffs, reply_markup=await gen_markup_users_tariff(name_tariffs))
+    await callback.message.answer(text=text_tariffs, reply_markup=await gen_markup_users_tariff(name_tariffs))
     await callback.answer()
 
 
@@ -156,6 +158,7 @@ async def confirms_tariff(callback: types.CallbackQuery):
     if int(inl_col[1]):
         tariff = orm.db_get_one_tariff(int(inl_col[2]))
         profile_user = orm.db_get_profile(callback.from_user.id)
+        orm.db_disables_product_tracking(id_user=callback.from_user.id, tracked_items=tariff.tracked_items)
         orm.db_changes_user_tariff(name_tariff=tariff.name_tariff,
                                    id_user=callback.from_user.id,
                                    tracked_items=tariff.tracked_items,

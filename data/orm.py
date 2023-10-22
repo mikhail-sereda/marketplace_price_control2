@@ -76,11 +76,11 @@ def db_get_all_users():
                                            User.tariff_user != 'Стандартный').all()
         return users
 
+
 def db_get_tracked_items(user_id):
     """Отает количество ссылок для отслеживания пользователю"""
     with Session() as session:
         items = session.query(User.tracked_items).filter(User.user_id == user_id).first()
-        print(items)
         return items[0]
 
 
@@ -119,7 +119,7 @@ def db_get_modified_products():
     """Отдаёт все активные товары с изменённой ценой"""
     with Session() as session:
         mod_products = session.query(UserProduct).filter(
-            UserProduct.price != UserProduct.pars_price).all()
+            UserProduct.price != UserProduct.pars_price, UserProduct.valve == 1).all()
         return mod_products
 
 
@@ -146,6 +146,21 @@ def db_adjusts_price(id_prod, price, min_price=None):
         else:
             one_prod.price = price
         session.commit()
+
+
+def db_disables_product_tracking(id_user, tracked_items=3):
+    """Выключает отслеживание товаров превышающее тариф"""
+    with Session() as session:
+        user_products = session.query(UserProduct).order_by(UserProduct.id).filter(
+            UserProduct.user_id == id_user).all()
+        for prod_activ in user_products[:tracked_items]:
+            prod_activ.valve = 1
+        for prod in user_products[tracked_items:]:
+            prod.valve = 0
+        session.commit()
+
+
+
 
 
 def db_adjusts_pars_price(id_prod, price):

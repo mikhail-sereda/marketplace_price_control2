@@ -113,6 +113,7 @@ async def sends_price_change_message():
     """Проверяет цену после парсинга с сохранёнными ценами, если цена снижена относительно стартовой сообщает пользователя
     если выше статовой, то перезаписывает текущую цену"""
     mod_products = orm.db_get_modified_products()
+    print(mod_products)
     for product in mod_products:
         caption = creating_caption_product(link=product.link,
                                            link_text=product.name_prod,
