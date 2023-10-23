@@ -29,7 +29,7 @@ async def useful(msg: types.Message):
     await msg.answer(text=f'Ссылки на полезные ресурсы', reply_markup=kb_main_user)
 
 
-@router.message(CheckTariff(), CheckLink())
+@router.message(CheckLink(), CheckTariff())
 async def parsing_link(msg: types.Message):
     """Получает ссылку на wildber выбирает id передаёт парсеру и записывает в бд"""
     product_dict = {'user_id': msg.from_user.id, 'link': msg.text}
@@ -57,7 +57,7 @@ async def parsing_link(msg: types.Message):
         await msg.answer(text='Не верная ссылка')
 
 
-@router.message()
-async def processing_other_messages(msg: types.Message):
-    """обрабатывает прочие сообщения"""
-    await msg.answer(text=f'Я вас не понимаю!!!', reply_markup=kb_main_user)
+# @router.message()
+# async def processing_other_messages(msg: types.Message):
+#     """обрабатывает прочие сообщения"""
+#     await msg.answer(text=f'Я вас не понимаю!!!', reply_markup=kb_main_user)

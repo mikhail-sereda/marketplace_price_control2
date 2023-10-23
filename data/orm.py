@@ -67,11 +67,23 @@ def db_increase_user_balance(user_id: int, balance: float):
 
 
 def db_get_all_users():
+    """Отдаёт количество всex пользователей, с разбивкой на активные и нет"""
+    with Session() as session:
+        users = session.query(User).all()
+        activ_users = 0
+        no_activ_users = 0
+        for us in users:
+            if us.activ == 0:
+                no_activ_users += 1
+            elif us.activ == 1:
+                activ_users += 1
+        return len(users), activ_users, no_activ_users
+
+
+def db_get_all_users_stop_tariff():
     """Отдаёт всex пользователей"""
     with Session() as session:
         filter_after = datetime.now() - timedelta(days=180)
-        print(filter_after)
-
         users = session.query(User).filter(User.tariff_user_date < filter_after,
                                            User.tariff_user != 'Стандартный').all()
         return users

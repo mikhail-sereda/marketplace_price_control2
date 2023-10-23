@@ -32,4 +32,5 @@ class CheckTariff(Filter):
 class CheckLink(Filter):
     async def __call__(self, msg: Message):
         a = re.compile(r'\Swildberries.ru/catalog/\d+/\S')
-        return a.findall(msg.text)
+        print(bool(a.findall(msg.text)))
+        return bool(a.findall(msg.text))

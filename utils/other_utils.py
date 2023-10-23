@@ -6,7 +6,7 @@ from create_bot import bot
 
 
 async def checking_tariff_user():
-    users = orm.db_get_all_users()
+    users = orm.db_get_all_users_stop_tariff()
     for user in users:
         orm.db_changes_user_tariff(name_tariff='Стандартный',
                                    id_user=user.user_id,

@@ -21,6 +21,15 @@ async def start_admin(msg: types.Message):
     await msg.answer(text='Привет', reply_markup=kb_main_admin)
 
 
+@router.message(F.text == 'Пользователи')
+async def users_statist(msg: types.Message):
+    """Обрабатывает кнопку Пользователи"""
+    users = orm.db_get_all_users()
+    await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
+                          f'Активные пользователи {users[1]} чел.\n'
+                          f'Не активные пользователи {users[2]} чел.\n')
+
+
 @router.message(F.text == 'Тарифы')
 async def useful(msg: types.Message):
     """Обрабатывает кнопку тарифы"""

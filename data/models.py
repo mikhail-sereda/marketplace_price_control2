@@ -48,3 +48,14 @@ class Tariffs(Base):
     active_tariff = Column(Integer, default=1, nullable=False)
 
 
+class Advertisement(Base):
+    __tablename__ = 'advertisement'
+    id = Column(Integer, primary_key=True)
+    img = Column(String, default=0, nullable=False)
+    text = Column(String, default=0, nullable=False)
+    button = Column(String, default=0, nullable=False)
+    click_counter = Column(Integer, default=0, nullable=False)
+    add_date = Column(DateTime, default=datetime.now, nullable=False)
+    repeat_date = Column(DateTime, default=datetime.now, nullable=False)
+    active_ad = Column(Integer, default=1, nullable=False)
+    counter = Column(Integer, default=1, nullable=False)
