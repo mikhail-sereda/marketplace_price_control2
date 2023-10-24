@@ -8,7 +8,7 @@ from keyboards.kb_admin import kb_main_admin
 from keyboards.ikb_admin import gen_markup_category_tariff, gen_markup_cancel_fsm, gen_markup_menu_tariff
 from filters.my_filter import AdmFilter
 from data import orm
-from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM
+from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
 
 router: Router = Router()
@@ -107,7 +107,7 @@ async def add_tariff_3(msg: types.Message, state: FSMContext):
 
 
 @router.message(FiltersFSM.price_tariff)
-async def add_tariff_3(msg: types.Message, state: FSMContext):
+async def add_tariff_4(msg: types.Message, state: FSMContext):
     """Ловит тарифа и завершает FSM"""
     if msg.text.isdigit():
         await state.update_data(price_tariff=msg.text)
@@ -120,6 +120,46 @@ async def add_tariff_3(msg: types.Message, state: FSMContext):
         await state.clear()
     else:
         await msg.answer(text='Сообщение должно содержать только цифры.')
+
+
+"""__________________________________________"""
+
+
+@router.message(F.text == 'Выгрузка')
+async def add_advertisement_1(msg: types.Message, state: FSMContext):
+    """Добавление новой рекламы старт FSM"""
+    await msg.answer(text='Картинка рекламы', reply_markup=await gen_markup_cancel_fsm())
+    await state.set_state(AddAdvertisementFSM.img)
+
+
+@router.message(AddAdvertisementFSM.img)
+async def add_advertisement_2(msg: types.Message, state: FSMContext):
+    """Ловит фото и переходит в ожидание текста FSM"""
+    await state.update_data(img=msg.photo[-1].file_id)
+    await msg.answer(text='Текст рекламы', reply_markup=await gen_markup_cancel_fsm())
+    await state.set_state(AddAdvertisementFSM.text)
+
+
+@router.message(AddAdvertisementFSM.text)
+async def add_advertisement_3(msg: types.Message, state: FSMContext):
+    """Ловит текст рекламы текста FSM"""
+    await state.update_data(text=msg.text)
+    await msg.answer(text='Ссылка', reply_markup=await gen_markup_cancel_fsm())
+    await state.set_state(AddAdvertisementFSM.button_link)
+
+
+@router.message(AddAdvertisementFSM.button_link)
+async def add_advertisement_4(msg: types.Message, state: FSMContext):
+    """Ловит ссылку и завершает FSM"""
+
+    await state.update_data(button=msg.text)
+    x = await state.get_data()
+    print(x)
+    await msg.answer_photo(photo=x['img'], caption=f'{x["text"]} {x["button"]}', reply_markup=await gen_markup_cancel_fsm())
+    await state.clear()
+
+
+"""________________________________________________________________________"""
 
 
 @router.callback_query(lambda x: x.data.startswith('ok_pay'))

@@ -9,3 +9,9 @@ class FiltersFSM(StatesGroup):
 
 class AddMoneyFSM(StatesGroup):
     amount_money = State()
+
+
+class AddAdvertisementFSM(StatesGroup):
+    img = State()
+    text = State()
+    button_link = State()
