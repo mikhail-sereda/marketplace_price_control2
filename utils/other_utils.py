@@ -1,5 +1,7 @@
 import asyncio
 import threading
+from aiogram import types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from data import orm
 from create_bot import bot
@@ -23,3 +25,17 @@ async def checking_tariff_thread(wait_for):
         await asyncio.sleep(wait_for)
         check = threading.Thread(target=await checking_tariff_user())
         check.start()
+
+
+async def sends_ads():
+    users = orm.db_get_activ_users()
+    print(1, users)
+    ad = orm.db_get_ad()
+    print(ad)
+    photo = types.InputMediaPhoto(media=ad.img,
+                                  caption=ad.text)
+    for user in users:
+        print(user)
+        await bot.send_photo(chat_id=user[0], photo=ad.img, caption=ad.text,
+                             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                                 [InlineKeyboardButton(text=f'{ad.button}', url=f'{ad.button}')]]))

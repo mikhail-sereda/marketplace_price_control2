@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import create_engine, insert
+from sqlalchemy import create_engine, insert, sql
 from sqlalchemy.orm import sessionmaker
 
 from dotenv import dotenv_values
 
-from data.models import User, UserProduct, Tariffs, Base
+from data.models import User, UserProduct, Tariffs, Base, Advertisement
 
 config = dotenv_values(".env", encoding="utf-8")
 ADMIN_ID = config['ADMIN_ID']
@@ -86,6 +86,14 @@ def db_get_all_users_stop_tariff():
         filter_after = datetime.now() - timedelta(days=180)
         users = session.query(User).filter(User.tariff_user_date < filter_after,
                                            User.tariff_user != 'Стандартный').all()
+        return users
+
+
+def db_get_activ_users():
+    """Отдаёт активных пользователей"""
+    with Session() as session:
+        users = session.query(User.user_id).filter(User.activ == 1).all()
+        print(users)
         return users
 
 
@@ -233,3 +241,19 @@ def db_actions_with_tariffs(id_tariff, active_tariff):
         tariff = session.query(Tariffs).filter(Tariffs.id == id_tariff).first()
         tariff.active_tariff = active_tariff
         session.commit()
+
+
+"""_________________Advertisement__________________"""
+
+
+def db_add_ad(data):
+    """Добавляет новую рекламу в базу данных"""
+    with Session() as session:
+        session.execute(Advertisement.__table__.insert(), data)
+        session.commit()
+
+def db_get_ad():
+    with Session() as session:
+        ad_id = session.query(sql.func.max(Advertisement.id)).first()
+        return session.query(Advertisement).filter(Advertisement.id == ad_id[0]).first()
+

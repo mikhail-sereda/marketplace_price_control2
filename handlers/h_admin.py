@@ -10,6 +10,7 @@ from filters.my_filter import AdmFilter
 from data import orm
 from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
+from utils.other_utils import sends_ads
 
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
@@ -128,35 +129,44 @@ async def add_tariff_4(msg: types.Message, state: FSMContext):
 @router.message(F.text == 'Выгрузка')
 async def add_advertisement_1(msg: types.Message, state: FSMContext):
     """Добавление новой рекламы старт FSM"""
-    await msg.answer(text='Картинка рекламы', reply_markup=await gen_markup_cancel_fsm())
+    await msg.answer(text='Картинка рекламы или 0 для пропуска', reply_markup=await gen_markup_cancel_fsm())
     await state.set_state(AddAdvertisementFSM.img)
 
 
-@router.message(AddAdvertisementFSM.img)
+@router.message(F.photo, AddAdvertisementFSM.img)
 async def add_advertisement_2(msg: types.Message, state: FSMContext):
     """Ловит фото и переходит в ожидание текста FSM"""
-    await state.update_data(img=msg.photo[-1].file_id)
-    await msg.answer(text='Текст рекламы', reply_markup=await gen_markup_cancel_fsm())
+    if msg.text == '0':
+        await state.update_data(img=msg.text)
+    else:
+        await state.update_data(img=msg.photo[-1].file_id)
+    await msg.answer(text='Текст рекламы или 0 для пропуска', reply_markup=await gen_markup_cancel_fsm())
     await state.set_state(AddAdvertisementFSM.text)
 
 
 @router.message(AddAdvertisementFSM.text)
 async def add_advertisement_3(msg: types.Message, state: FSMContext):
     """Ловит текст рекламы текста FSM"""
-    await state.update_data(text=msg.text)
-    await msg.answer(text='Ссылка', reply_markup=await gen_markup_cancel_fsm())
+    if msg.text == '0':
+        await state.update_data(text=msg.text)
+    else:
+        await state.update_data(text=msg.text)
+    await msg.answer(text='Ссылка или 0 для пропуска', reply_markup=await gen_markup_cancel_fsm())
     await state.set_state(AddAdvertisementFSM.button_link)
 
 
 @router.message(AddAdvertisementFSM.button_link)
 async def add_advertisement_4(msg: types.Message, state: FSMContext):
     """Ловит ссылку и завершает FSM"""
-
-    await state.update_data(button=msg.text)
+    if msg.text == '0':
+        await state.update_data(button=msg.)
+    else:
+        await state.update_data(button=msg.text)
     x = await state.get_data()
-    print(x)
-    await msg.answer_photo(photo=x['img'], caption=f'{x["text"]} {x["button"]}', reply_markup=await gen_markup_cancel_fsm())
+    orm.db_add_ad(x)
     await state.clear()
+    await sends_ads()
+
 
 
 """________________________________________________________________________"""
