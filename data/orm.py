@@ -252,6 +252,7 @@ def db_add_ad(data):
         session.execute(Advertisement.__table__.insert(), data)
         session.commit()
 
+
 def db_get_ad():
     with Session() as session:
         ad_id = session.query(sql.func.max(Advertisement.id)).first()

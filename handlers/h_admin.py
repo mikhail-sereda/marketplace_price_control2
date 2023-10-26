@@ -11,7 +11,7 @@ from data import orm
 from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
 from utils.other_utils import sends_ads
-
+from utils.sqlite import migr_users
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
 
@@ -25,6 +25,9 @@ async def start_admin(msg: types.Message):
 @router.message(F.text == 'Пользователи')
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
+
+
+    # migr_users()
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'
@@ -181,7 +184,6 @@ async def add_advertisement_5(msg: types.Message, state: FSMContext):
 
 
 """________________________________________________________________________"""
-
 
 @router.callback_query(lambda x: x.data.startswith('ok_pay'))
 async def start_fsm_add_money(callback: types.CallbackQuery, state: FSMContext):
