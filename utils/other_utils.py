@@ -28,6 +28,7 @@ async def checking_tariff_thread(wait_for):
 
 
 async def sends_ads():
+    """Пересылает объявление всем активным пользователям"""
     users = orm.db_get_activ_users()
     print(1, users)
     ad = orm.db_get_ad()

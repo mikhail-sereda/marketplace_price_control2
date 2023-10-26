@@ -15,3 +15,4 @@ class AddAdvertisementFSM(StatesGroup):
     img = State()
     text = State()
     button_link = State()
+    button_name = State()

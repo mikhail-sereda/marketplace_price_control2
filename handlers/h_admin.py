@@ -151,15 +151,26 @@ async def add_advertisement_3(msg: types.Message, state: FSMContext):
         await state.update_data(text=msg.text)
     else:
         await state.update_data(text=msg.text)
+    await msg.answer(text='Наименование кнопки 0 для пропуска', reply_markup=await gen_markup_cancel_fsm())
+    await state.set_state(AddAdvertisementFSM.button_name)
+
+
+@router.message(AddAdvertisementFSM.button_name)
+async def add_advertisement_4(msg: types.Message, state: FSMContext):
+    """Ловит наименование кнопки FSM"""
+    if msg.text == '0':
+        await state.update_data(button_name=msg.text)
+    else:
+        await state.update_data(button_name=msg.text)
     await msg.answer(text='Ссылка или 0 для пропуска', reply_markup=await gen_markup_cancel_fsm())
     await state.set_state(AddAdvertisementFSM.button_link)
 
 
 @router.message(AddAdvertisementFSM.button_link)
-async def add_advertisement_4(msg: types.Message, state: FSMContext):
+async def add_advertisement_5(msg: types.Message, state: FSMContext):
     """Ловит ссылку и завершает FSM"""
     if msg.text == '0':
-        await state.update_data(button=msg.)
+        await state.update_data(button=msg.text)
     else:
         await state.update_data(button=msg.text)
     x = await state.get_data()
