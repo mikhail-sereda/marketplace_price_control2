@@ -1,6 +1,6 @@
 import asyncio
 import threading
-from aiogram import exceptions
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from data import orm
@@ -36,5 +36,5 @@ async def sends_ads():
             await bot.send_photo(chat_id=user[0], photo=ad.img, caption=ad.text,
                                  reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                                      [InlineKeyboardButton(text=f'{ad.button_name}', url=f'{ad.button}')]]))
-        except exceptions.TelegramForbiddenError:
+        except:
             orm.db_changes_user_activ(id_user=user[0], activ=0)

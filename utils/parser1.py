@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import threading
-import re
 
 import requests
 from fake_useragent import UserAgent
@@ -101,19 +100,19 @@ def parsing_all():
         url_get_prod = url_get + str(i.id_prod)
         req = requests.get(url_get_prod, headers)
         js_dict = req.json()
-        try:
-            price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
-        except KeyError:
-            price = js_dict['data']['products'][0]['priceU'] / 100
-        if i.pars_price != price:
-            orm.db_adjusts_pars_price(id_prod=i.id, price=price)
+        if js_dict['data']['products']:
+            try:
+                price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
+            except KeyError:
+                price = js_dict['data']['products'][0]['priceU'] / 100
+            if i.pars_price != price:
+                orm.db_adjusts_pars_price(id_prod=i.id, price=price)
 
 
 async def sends_price_change_message():
     """Проверяет цену после парсинга с сохранёнными ценами, если цена снижена относительно стартовой сообщает пользователя
     если выше статовой, то перезаписывает текущую цену"""
     mod_products = orm.db_get_modified_products()
-    print(mod_products)
     for product in mod_products:
         caption = creating_caption_product(link=product.link,
                                            link_text=product.name_prod,

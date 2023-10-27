@@ -50,7 +50,6 @@ def db_changes_user_tariff(name_tariff: str, id_user: int, tracked_items: int, b
 
 def db_changes_user_activ(id_user: int, activ: int):
     """Изменяет активность у пользователя. 0 не активный, 1 активный"""
-    print(id_user, activ)
     with Session() as session:
         one_user = session.query(User).filter(User.user_id == id_user).first()
         one_user.activ = activ
@@ -93,7 +92,6 @@ def db_get_activ_users():
     """Отдаёт активных пользователей"""
     with Session() as session:
         users = session.query(User.user_id).filter(User.activ == 1).all()
-        print(users)
         return users
 
 
@@ -180,9 +178,6 @@ def db_disables_product_tracking(id_user, tracked_items=3):
         session.commit()
 
 
-
-
-
 def db_adjusts_pars_price(id_prod, price):
     """Обновляет текущую цену после парсинга"""
     with Session() as session:
@@ -204,6 +199,7 @@ def db_dell_product(id_rec):
 def db_added_tariff_standart():
     new_tariff = {'name_tariff': 'Стандартный', 'price_tariff': 0, 'active_tariff': 1}
     db_add_new_tariff(new_tariff)
+
 
 def db_get_tariffs(index_activ):
     """Получает активные или не активные тарифы """
@@ -261,4 +257,3 @@ def db_get_ad():
     with Session() as session:
         ad_id = session.query(sql.func.max(Advertisement.id)).first()
         return session.query(Advertisement).filter(Advertisement.id == ad_id[0]).first()
-

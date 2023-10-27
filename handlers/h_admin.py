@@ -1,7 +1,6 @@
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from keyboards.kb_admin import kb_main_admin
@@ -12,6 +11,7 @@ from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
 from utils.other_utils import sends_ads
 from utils.sqlite import migr_users
+
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
 
@@ -19,15 +19,14 @@ router.message.filter(AdmFilter())  # применяем ко всем хенд�
 # https://mastergroosha.github.io/aiogram-3-guide/fsm/
 @router.message(CommandStart())
 async def start_admin(msg: types.Message):
+    orm.db_add_user(msg.from_user.id)
     await msg.answer(text='Привет', reply_markup=kb_main_admin)
 
 
 @router.message(F.text == 'Пользователи')
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
-
-
-    # migr_users()
+    migr_users()
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'
@@ -203,7 +202,6 @@ async def start_fsm_add_money(callback: types.CallbackQuery, state: FSMContext):
 async def increase_user_balance(msg: types.Message, state: FSMContext):
     """Принимает сумму и пополняет баланс пользователю"""
     id_user = await state.get_data()
-    print(id_user)
     orm.db_increase_user_balance(user_id=id_user['user_id'],
                                  balance=float(msg.text))
     # await msg.forward(chat_id=ADMIN_ID)
