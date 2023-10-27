@@ -6,6 +6,7 @@ from handlers import h_admin, h_user, h_other
 from utils.parser1 import parsing_price_thread
 from utils.other_utils import checking_tariff_thread
 
+
 async def main() -> None:
     dp.include_router(h_admin.router)
     dp.include_router(h_user.router)
@@ -15,7 +16,6 @@ async def main() -> None:
     loop.create_task(parsing_price_thread(10))
     loop.create_task(checking_tariff_thread(5))
     await dp.start_polling(bot)
-
 
 
 if __name__ == '__main__':

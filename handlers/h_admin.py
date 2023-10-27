@@ -37,6 +37,7 @@ async def users_statist(msg: types.Message):
 @router.message(F.text == 'Тарифы')
 async def useful(msg: types.Message):
     """Обрабатывает кнопку тарифы"""
+    orm.db_added_tariff_standart()
     await msg.answer(text=f'Тарифы', reply_markup=await gen_markup_category_tariff())
 
 
@@ -129,7 +130,7 @@ async def add_tariff_4(msg: types.Message, state: FSMContext):
 """__________________________________________"""
 
 
-@router.message(F.text == 'Выгрузка')
+@router.message(F.text == 'Реклама')
 async def add_advertisement_1(msg: types.Message, state: FSMContext):
     """Добавление новой рекламы старт FSM"""
     await msg.answer(text='Картинка рекламы или 0 для пропуска', reply_markup=await gen_markup_cancel_fsm())

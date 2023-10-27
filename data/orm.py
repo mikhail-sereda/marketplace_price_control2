@@ -198,8 +198,12 @@ def db_dell_product(id_rec):
         session.commit()
 
 
-"""Tariffs"""
+"""_________________Tariffs_________________________"""
 
+
+def db_added_tariff_standart():
+    new_tariff = {'name_tariff': 'Стандартный', 'price_tariff': 0, 'active_tariff': 1}
+    db_add_new_tariff(new_tariff)
 
 def db_get_tariffs(index_activ):
     """Получает активные или не активные тарифы """
