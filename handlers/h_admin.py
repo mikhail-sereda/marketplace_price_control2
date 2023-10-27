@@ -24,7 +24,7 @@ async def start_admin(msg: types.Message):
     await msg.answer(text='Привет', reply_markup=kb_main_admin)
 
 
-@router.message(F.text == 'Мои товары')
+@router.message(F.text == 'Меню пользователя')
 async def admin_user(msg: types.Message):
     """меню ползователя админу"""
     await msg.answer(text=f'Привет {msg.from_user.first_name}', reply_markup=kb_main_user)

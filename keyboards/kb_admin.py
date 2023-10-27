@@ -6,7 +6,7 @@ from keyboards.kb_other import bt_my_stock
 
 bt_number_users: KeyboardButton = KeyboardButton(text='Пользователи')
 bt_getting_all: KeyboardButton = KeyboardButton(text='Реклама')
-bt_add_admin: KeyboardButton = KeyboardButton(text='Добавить админа')
+bt_add_admin: KeyboardButton = KeyboardButton(text='Меню пользователя')
 bt_add_blacklist: KeyboardButton = KeyboardButton(text='Добавить\nв ЧС')
 bt_tariff: KeyboardButton = KeyboardButton(text='Тарифы')
 

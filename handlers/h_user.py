@@ -6,7 +6,7 @@ from keyboards.kb_user import kb_main_user
 from keyboards.ikb_user import gen_markup_pagination, gen_markup_profile, gen_markup_users_tariff, \
     gen_markup_replenishes, gen_markup_consent
 from keyboards.ikb_admin import gen_markup_cancel_fsm, gen_markup_ok_pay
-from filters.my_filter import UserFilt
+from filters.my_filter import UserFilt, AdmFilter
 from data import orm
 from data.FSMbot.FSMusers import ChequeFSM
 from data.orm import ADMIN_ID
@@ -23,7 +23,7 @@ async def start_user(msg: types.Message):
     await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
-@router.message(F.text == 'Мои товары')
+@router.message(F.text == 'Мои товары', AdmFilter())
 async def user_products(msg: types.Message):
     """Кнопка Мои товары"""
     tracked_items = orm.db_get_tracked_items(msg.from_user.id)
