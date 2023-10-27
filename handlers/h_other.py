@@ -5,7 +5,7 @@ from keyboards.kb_user import kb_main_user
 from data import orm
 from utils.parser1 import img_by_id, all_pars
 from filters.my_filter import CheckTariff, CheckLink
-from static.caption import creating_caption_product
+from static.caption import creating_caption_product, creating_text_help
 
 router: Router = Router()
 
@@ -14,26 +14,13 @@ router: Router = Router()
 async def start_other(msg: types.Message):
     """при входе нового пользователя добавляет в БД"""
     orm.db_add_user(msg.from_user.id)
-    await msg.answer(text=f'Привет {msg.from_user.first_name}', reply_markup=kb_main_user)
+    await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
 @router.message(F.text == 'Помощь')
 async def help_all(msg: types.Message):
     """Обрабатывает кнопку помощь для всех пользователей"""
-    await msg.answer(text=f'<b>Привет👋, {msg.from_user.first_name}</b>\n'
-                          f'💜Этот бот предназначен '
-                          f'для отслеживания цены товаров на '
-                          f'онлайн-маркетплейсе Wildberries.\n\n'
-                          f'💜Бот автоматически проверяет актуальную цену выбранного вами товара и '
-                          f'в случае ее уменьшения, отправляет вам уведомление.\n\n'
-                          f'💜Теперь вы можете быть в курсе последних изменений цен и не упустить выгодную сделку на Wildberries!\n\n'
-                          f'<b>Инструкция</b>\n'
-                          f'💜Чтобы отслеживать товар, скиньте ссылку на товар в чат с ботом.\n\n'
-                          f'💜У каждого пользователя есть личный кабинет в котором можно:\n'
-                          f'✅проверить текущее количество ваших товаров и сколько из них отслеживается\n'
-                          f'✅увидеть информацию о вашем текущем тарифе и балансе\n'
-                          f'✅подключить расширенный тариф\n'
-                          f'✅пополнить свой баланс', reply_markup=kb_main_user)
+    await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
 @router.message(F.text == 'Полезное')

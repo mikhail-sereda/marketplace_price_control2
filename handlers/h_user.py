@@ -11,7 +11,7 @@ from data import orm
 from data.FSMbot.FSMusers import ChequeFSM
 from data.orm import ADMIN_ID
 from create_bot import bot
-from static.caption import creating_caption_product
+from static.caption import creating_caption_product, creating_text_help
 
 router: Router = Router()
 
@@ -20,7 +20,7 @@ router: Router = Router()
 async def start_user(msg: types.Message):
     """При входе зарегистрированого пользователя проверяет данные в БД"""
     orm.db_add_user(msg.from_user.id)
-    await msg.answer(text=f'Привет {msg.from_user.first_name}', reply_markup=kb_main_user)
+    await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
 @router.message(F.text == 'Мои товары')

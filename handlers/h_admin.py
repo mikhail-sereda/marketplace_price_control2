@@ -4,13 +4,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from keyboards.kb_admin import kb_main_admin
+from keyboards.kb_user import kb_main_user
 from keyboards.ikb_admin import gen_markup_category_tariff, gen_markup_cancel_fsm, gen_markup_menu_tariff
 from filters.my_filter import AdmFilter
 from data import orm
 from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
 from utils.other_utils import sends_ads
-from utils.sqlite import migr_users
+# from utils.sqlite import migr_users
 
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
@@ -23,10 +24,16 @@ async def start_admin(msg: types.Message):
     await msg.answer(text='Привет', reply_markup=kb_main_admin)
 
 
+@router.message(F.text == 'Мои товары')
+async def admin_user(msg: types.Message):
+    """меню ползователя админу"""
+    await msg.answer(text=f'Привет {msg.from_user.first_name}', reply_markup=kb_main_user)
+
+
 @router.message(F.text == 'Пользователи')
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
-    migr_users()
+    # migr_users() нужна была для еденичной миграции пользователей из sqlite
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'
