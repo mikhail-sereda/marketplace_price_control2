@@ -57,7 +57,7 @@ async def parsing_link(msg: types.Message):
         await msg.answer(text='Не верная ссылка')
 
 
-# @router.message()
-# async def processing_other_messages(msg: types.Message):
-#     """обрабатывает прочие сообщения"""
-#     await msg.answer(text=f'Я вас не понимаю!!!', reply_markup=kb_main_user)
+@router.message()
+async def processing_other_messages(msg: types.Message):
+    """обрабатывает прочие сообщения"""
+    await msg.answer(text=f'Я вас не понимаю!!!', reply_markup=kb_main_user)
