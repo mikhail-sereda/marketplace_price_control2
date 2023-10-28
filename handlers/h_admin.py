@@ -35,10 +35,6 @@ async def admin_user(msg: types.Message):
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
     # migr_users() нужна была для еденичной миграции пользователей из sqlite
-    all_tov = orm.db_get_all_product()
-    for tov in all_tov:
-        d = all_pars(str(tov.id_prod))
-        orm.db_add_product1(d)
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'
