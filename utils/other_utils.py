@@ -29,9 +29,10 @@ async def checking_tariff_thread(wait_for):
 
 async def sends_ads():
     """Пересылает объявление всем активным пользователям"""
-    users = orm.db_get_activ_users()
+    users = orm.db_get_users()
     ad = orm.db_get_ad()
     for user in users:
+        orm.db_changes_user_activ(id_user=user[0], activ=1)
         try:
             await bot.send_photo(chat_id=user[0], photo=ad.img, caption=ad.text,
                                  reply_markup=InlineKeyboardMarkup(inline_keyboard=[

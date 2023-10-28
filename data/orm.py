@@ -95,6 +95,13 @@ def db_get_activ_users():
         return users
 
 
+def db_get_users():
+    """Отдаёт всех пользователей"""
+    with Session() as session:
+        users = session.query(User.user_id).all()
+        return users
+
+
 def db_get_tracked_items(user_id):
     """Отает количество ссылок для отслеживания пользователю"""
     with Session() as session:
