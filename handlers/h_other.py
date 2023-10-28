@@ -17,9 +17,9 @@ async def start_other(msg: types.Message):
     await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
-@router.message(F.text == 'Помощь')
+@router.message(F.text == '🆘Помощь')
 async def help_all(msg: types.Message):
-    """Обрабатывает кнопку помощь для всех пользователей"""
+    """Обрабатывает кнопку 🆘Помощь для всех пользователей"""
     await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
