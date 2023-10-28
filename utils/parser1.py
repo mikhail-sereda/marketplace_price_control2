@@ -8,10 +8,7 @@ import asyncio
 from create_bot import bot
 from data import orm
 from static.caption import creating_caption_product
-
-url_get = 'https://card.wb.ru/cards/detail?spp=0&regions=80,4,38,70,69,86,30,40,48,1,' \
-          '112&pricemarginCoeff=1&reg=0&appType=1&emp=0&locale=ru&lang=ru&curr=rub&couponsGeo=' \
-          '2,12,7,6,9,21,11&dest=-1221185,-147166,-1749247,123585533&nm='
+url_get = 'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1257786&spp=29&nm='
 
 
 def defines_product_id(urls_user: str):
@@ -79,7 +76,7 @@ def selects_values(js_dict):
     dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
     dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
     try:
-        dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
+        dict_bd['price'] = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
     except KeyError:
         dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
     return dict_bd
@@ -92,6 +89,7 @@ def all_pars(id_all):
     return all_bd
 
 
+
 def parsing_all():
     """Парсит цены и сравнивает их с ценой и мин ценой в БД. Если изменено перезаписывает"""
     all_product = orm.db_get_all_product()  # только активные продукты
@@ -102,7 +100,7 @@ def parsing_all():
         js_dict = req.json()
         if js_dict['data']['products']:
             try:
-                price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
+                price = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
             except KeyError:
                 price = js_dict['data']['products'][0]['priceU'] / 100
             if i.pars_price != price:
