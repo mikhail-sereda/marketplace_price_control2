@@ -23,7 +23,7 @@ async def start_user(msg: types.Message):
     await msg.answer(text=creating_text_help(msg.from_user.first_name), reply_markup=kb_main_user)
 
 
-@router.message(F.text == '🛍Мои товары', AdmFilter())
+@router.message(F.text == '🛍Мои товары')
 async def user_products(msg: types.Message):
     """Кнопка 🛍Мои товары"""
     tracked_items = orm.db_get_tracked_items(msg.from_user.id)
