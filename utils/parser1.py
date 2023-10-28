@@ -72,14 +72,17 @@ def generates_link_request(id_prod):
 
 def selects_values(js_dict):
     """Выбирает нужные характеристики"""
-    dict_bd = dict()
-    dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
-    dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
     try:
-        dict_bd['price'] = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
-    except KeyError:
-        dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
-    return dict_bd
+        dict_bd = dict()
+        dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
+        dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
+        try:
+            dict_bd['price'] = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+        except KeyError:
+            dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
+        return dict_bd
+    except:
+        pass
 
 
 def all_pars(id_all):

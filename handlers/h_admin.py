@@ -12,6 +12,7 @@ from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
 from utils.other_utils import sends_ads
 # from utils.sqlite import migr_users
+from utils.parser1 import all_pars
 
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа
@@ -34,6 +35,10 @@ async def admin_user(msg: types.Message):
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
     # migr_users() нужна была для еденичной миграции пользователей из sqlite
+    all_tov = orm.db_get_all_product()
+    for tov in all_tov:
+        d = all_pars(str(tov.id_prod))
+        orm.db_add_product1(d)
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'

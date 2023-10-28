@@ -116,6 +116,20 @@ def db_add_product(product: dict):
             session.commit()
             return False
 
+def db_add_product1(product: dict):
+    """добавляет новый товар и возвращает True, если пользователь уже следит за товаром возвращает False"""
+    with Session() as session:
+        try:
+            replay_product = session.query(UserProduct).filter(UserProduct.id_prod == product['id_prod']).first()
+            replay_product.start_price =product['price']
+            replay_product.min_price = product['price']
+            replay_product.price = product['price']
+            replay_product.pars_price = product['price']
+        except:
+            pass
+        session.commit()
+
+
 
 def db_get_user_product(id_user):
     """Отдаёт все товары пользователя па id user"""
@@ -130,6 +144,7 @@ def db_get_all_product():
     with Session() as session:
         all_prod = session.query(UserProduct).filter(
             UserProduct.valve == 1).all()
+        print(all_prod)
         return all_prod
 
 
