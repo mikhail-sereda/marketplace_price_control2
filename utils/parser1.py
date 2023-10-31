@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pprint
 import threading
 
 import requests
@@ -76,7 +77,10 @@ def selects_values(js_dict):
     dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
     dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
     try:
-        dict_bd['price'] = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+        if 'clientPriceU' in js_dict['data']['products'][0]['extended']:
+            dict_bd['price'] = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+        else:
+            dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
     except KeyError:
         dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
     return dict_bd
@@ -99,7 +103,10 @@ def parsing_all():
         js_dict = req.json()
         if js_dict['data']['products']:
             try:
-                price = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+                if 'clientPriceU' in js_dict['data']['products'][0]['extended']:
+                    price = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+                else:
+                    price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
             except KeyError:
                 price = js_dict['data']['products'][0]['priceU'] / 100
             if i.pars_price != price:
