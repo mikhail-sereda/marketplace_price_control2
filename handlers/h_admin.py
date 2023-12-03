@@ -34,20 +34,20 @@ async def admin_user(msg: types.Message):
 @router.message(F.text == 'Пользователи')
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
-    prods = orm.db_get_all_product234()
-    x = 0
-    y = 0
-    for prod in prods:
-        try:
-            dic = all_pars(str(prod.id_prod))
-            orm.db_adjusts_pars_startprice(id_prod=int(prod.id), price=dic['price'])
-            x += 1
-        except:
-            y +=1
-            pass
-    await msg.answer(text=f'Успешно {x} товаров\n'
-                          f'Ошибка {y}\n'
-                          f'всего в базе {len(prods)} товаров')
+    # prods = orm.db_get_all_product234()
+    # x = 0
+    # y = 0
+    # for prod in prods:
+    #     try:
+    #         dic = all_pars(str(prod.id_prod))
+    #         orm.db_adjusts_pars_startprice(id_prod=int(prod.id), price=dic['price'])
+    #         x += 1
+    #     except:
+    #         y +=1
+    #         pass
+    # await msg.answer(text=f'Успешно {x} товаров\n'
+    #                       f'Ошибка {y}\n'
+    #                       f'всего в базе {len(prods)} товаров')
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'
