@@ -194,6 +194,24 @@ def db_adjusts_pars_price(id_prod, price):
         session.commit()
 
 
+def db_adjusts_pars_startprice(id_prod, price):  # Обновляет цены не всех товарах
+    """"""
+    with Session() as session:
+        one_prod = session.query(UserProduct).filter(UserProduct.id == id_prod).first()
+        one_prod.pars_price = price
+        one_prod.min_price = price
+        one_prod.start_price = price
+        one_prod.price = price
+        session.commit()
+
+def db_get_all_product234():
+    """Отдаёт все активные товары"""
+    with Session() as session:
+        all_prod = session.query(UserProduct).all()
+        # print(all_prod)
+        return all_prod
+
+
 def db_dell_product(id_rec):
     with Session() as session:
         record_to_delete = session.query(UserProduct).filter(UserProduct.id == id_rec).first()

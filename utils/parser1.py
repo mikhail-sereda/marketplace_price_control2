@@ -73,7 +73,9 @@ def generates_link_request(id_prod):
 
 def selects_values(js_dict):
     """Выбирает нужные характеристики"""
+    # pprint.pprint(js_dict)
     dict_bd = dict()
+
     dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
     dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
     try:
@@ -82,7 +84,10 @@ def selects_values(js_dict):
         else:
             dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
     except KeyError:
-        dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
+        if 'salePriceU' in js_dict['data']['products'][0]:
+            dict_bd['price'] = js_dict['data']['products'][0]['salePriceU'] / 100
+        else:
+            dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
     return dict_bd
 
 

@@ -34,7 +34,20 @@ async def admin_user(msg: types.Message):
 @router.message(F.text == 'Пользователи')
 async def users_statist(msg: types.Message):
     """Обрабатывает кнопку Пользователи"""
-    # migr_users() нужна была для еденичной миграции пользователей из sqlite
+    prods = orm.db_get_all_product234()
+    x = 0
+    y = 0
+    for prod in prods:
+        try:
+            dic = all_pars(str(prod.id_prod))
+            orm.db_adjusts_pars_startprice(id_prod=int(prod.id), price=dic['price'])
+            x += 1
+        except:
+            y +=1
+            pass
+    await msg.answer(text=f'Успешно {x} товаров\n'
+                          f'Ошибка {y}\n'
+                          f'всего в базе {len(prods)} товаров')
     users = orm.db_get_all_users()
     await msg.answer(text=f'Всего в базе {users[0]} чел.\n'
                           f'Активные пользователи {users[1]} чел.\n'
@@ -190,8 +203,8 @@ async def add_advertisement_5(msg: types.Message, state: FSMContext):
     await sends_ads()
 
 
-
 """________________________________________________________________________"""
+
 
 @router.callback_query(lambda x: x.data.startswith('ok_pay'))
 async def start_fsm_add_money(callback: types.CallbackQuery, state: FSMContext):
@@ -214,7 +227,7 @@ async def increase_user_balance(msg: types.Message, state: FSMContext):
                                  balance=float(msg.text))
     # await msg.forward(chat_id=ADMIN_ID)
     await bot.send_message(chat_id=id_user['user_id'], text=f'Пополнение баланса.\n'
-                                                 f'Ваш баланс пополнен на {msg.text} руб.\n')
+                                                            f'Ваш баланс пополнен на {msg.text} руб.\n')
     await state.clear()
 
 
