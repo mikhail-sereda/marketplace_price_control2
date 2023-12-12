@@ -113,7 +113,10 @@ def parsing_all():
                 else:
                     price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
             except KeyError:
-                price = js_dict['data']['products'][0]['priceU'] / 100
+                if 'salePriceU' in js_dict['data']['products'][0]:
+                    price = js_dict['data']['products'][0]['salePriceU'] / 100
+                else:
+                    price = js_dict['data']['products'][0]['priceU'] / 100
             if i.pars_price != price:
                 orm.db_adjusts_pars_price(id_prod=i.id, price=price)
 
