@@ -231,6 +231,42 @@ async def increase_user_balance(msg: types.Message, state: FSMContext):
     await state.clear()
 
 
+@router.callback_query(lambda x: x.data.startswith('com_no_pay'))
+async def fsm_cancel(callback: types.CallbackQuery):
+    """Отмена оплаты по нажатию кнопки отмена оплаты"""
+    text_comment = ['Необходимо прислать подтверждение платежа.\n'
+                    'Произведите оплату\n'
+                    'Нажмите на кнопку Оплачено\n'
+                    'Прикрепите  документ подтверждающий оплату (скриншот, чек и т.д.)',
+                    'Проверьте правильность указанных реквизитов',
+                    'Ваши сообщения расцениваются как спам.\n'
+                    'При повторных сообщениях подобного характера ваш аккаунт будет заблокирован']
+    inl_col = callback.data.split(':')
+    await bot.send_message(chat_id=int(inl_col[2]), text=f'<b>Ошибка пополнения баланса</b>\n'
+                                                         f'Ваш баланс не пополнен.\n'
+                                                         f'{text_comment[int(inl_col[1])]}')
+    await callback.message.edit_reply_markup(inline_message_id=callback.id)
+    await callback.message.answer(f'Пользователю {int(inl_col[2])}\n'
+                                  f'{text_comment[int(inl_col[1])]}')
+
+
+@router.callback_query(lambda x: x.data.startswith('no_pay'))
+async def fsm_cancel(callback: types.CallbackQuery):
+    """Отмена оплаты по нажатию кнопки отмена оплаты"""
+    inl_col = callback.data.split(':')
+    await callback.message.edit_reply_markup(inline_message_id=callback.id,
+                                             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                                                 [InlineKeyboardButton(text=f'Нет подтверждения',
+                                                                       callback_data=f'com_no_pay:0:{int(inl_col[1])}')],
+                                                 [InlineKeyboardButton(text=f'Платёж не прошёл',
+                                                                       callback_data=f'com_no_pay:1:{int(inl_col[1])}')],
+                                                 [InlineKeyboardButton(text=f'Спам',
+                                                                       callback_data=f'com_no_pay:2:{int(inl_col[1])}')],
+                                                 [InlineKeyboardButton(text=f'Пополнить баланс',
+                                                                       callback_data=f'ok_pay:{int(inl_col[1])}')]
+                                             ]))
+
+
 @router.callback_query(lambda x: x.data.startswith('cancelFSM'))
 async def fsm_cancel(callback: types.CallbackQuery, state: FSMContext):
     """Отмена FSM по нажатию кнопки отмена"""
