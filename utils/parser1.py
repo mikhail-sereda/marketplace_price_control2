@@ -9,6 +9,7 @@ import asyncio
 from create_bot import bot
 from data import orm
 from static.caption import creating_caption_product
+
 url_get = 'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1257786&spp=29&nm='
 
 
@@ -28,33 +29,74 @@ def img_by_id(id_ph):
     short_id = int(id_ph) // 100000
     basket = ''
     match short_id:
-        case num if num in range(0, 144):
-            basket = '01'
-        case num if num in range(144, 288):
-            basket = '02'
-        case num if num in range(288, 432):
-            basket = '03'
-        case num if num in range(432, 720):
-            basket = '04'
-        case num if num in range(720, 1008):
-            basket = '05'
-        case num if num in range(1008, 1062):
-            basket = '06'
-        case num if num in range(1062, 1116):
-            basket = '07'
-        case num if num in range(1116, 1170):
-            basket = '08'
-        case num if num in range(1170, 1314):
-            basket = '09'
-        case num if num in range(1314, 1602):
-            basket = '10'
-        case num if num in range(1602, 1656):
-            basket = '11'
-        case num if num in range(1656, 1920):
-            basket = '12'
+        case num if 0 <= short_id <= 143:
+            basket = "01"
+        case num if short_id <= 287:
+            basket = "02"
+        case num if short_id <= 431:
+            basket = "03"
+        case num if short_id <= 719:
+            basket = "04"
+        case num if short_id <= 1007:
+            basket = "05"
+        case num if short_id <= 1061:
+            basket = "06"
+        case num if short_id <= 1115:
+            basket = "07"
+        case num if short_id <= 1169:
+            basket = "08"
+        case num if short_id <= 1313:
+            basket = "09"
+        case num if short_id <= 1601:
+            basket = "10"
+        case num if short_id <= 1655:
+            basket = "11"
+        case num if short_id <= 1919:
+            basket = "12"
+        case num if short_id <= 2045:
+            basket = "13"
+        case num if short_id <= 2189:
+            basket = "14"
+
+        case num if short_id <= 2405:
+            basket = "15"
+
+        case num if short_id <= 2621:
+            basket = "16"
+
+        case num if short_id <= 2837:
+            basket = "17"
+
         case _:
-            basket = '13'  # Если _short_id не входит ни в один из предыдущих диапазонов, присвоить '13' basket-у
-    s = f'https://basket-{basket}.wb.ru/vol{short_id}/part{int(id_ph) // 1000}/{id_ph}/images/c246x328/1.jpg'
+            basket = "18"
+        # case num if num in range(0, 144):
+        #     basket = '01'
+        # case num if num in range(144, 288):
+        #     basket = '02'
+        # case num if num in range(288, 432):
+        #     basket = '03'
+        # case num if num in range(432, 720):
+        #     basket = '04'
+        # case num if num in range(720, 1008):
+        #     basket = '05'
+        # case num if num in range(1008, 1062):
+        #     basket = '06'
+        # case num if num in range(1062, 1116):
+        #     basket = '07'
+        # case num if num in range(1116, 1170):
+        #     basket = '08'
+        # case num if num in range(1170, 1314):
+        #     basket = '09'
+        # case num if num in range(1314, 1602):
+        #     basket = '10'
+        # case num if num in range(1602, 1656):
+        #     basket = '11'
+        # case num if num in range(1656, 1920):
+        #     basket = '12'
+        # case _:
+        #     basket = '13'  # Если _short_id не входит ни в один из предыдущих диапазонов, присвоить '13' basket-у
+    # s = f'https://basket-{basket}.wb.ru/vol{short_id}/part{int(id_ph) // 1000}/{id_ph}/images/c246x328/1.jpg'
+    s = f'https://basket-{basket}.wbbasket.ru/vol{short_id}/part{int(id_ph) // 1000}/{id_ph}/images/c246x328/1.webp'
     try:
         requests.get(s, headers)
         return s

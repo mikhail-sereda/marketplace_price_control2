@@ -56,12 +56,24 @@ async def product_pagination(callback: types.CallbackQuery):
                                                                    start_price=all_product[page_number].start_price,
                                                                    min_price=all_product[page_number].min_price,
                                                                    price=all_product[page_number].price))
-
-    await callback.message.edit_media(media=photo,
-                                      reply_markup=await gen_markup_pagination(
-                                          str(all_product[page_number].id),
-                                          len(all_product),
-                                          page_number=page_number))
+    try:
+        await callback.message.edit_media(media=photo,
+                                          reply_markup=await gen_markup_pagination(
+                                              str(all_product[page_number].id),
+                                              len(all_product),
+                                              page_number=page_number))
+    except:
+        photo = types.InputMediaPhoto(media='https://rdstroy.ru/upload/images/335515/big/photo2.jpg',
+                                      caption=creating_caption_product(link=all_product[page_number].link,
+                                                                       link_text=all_product[page_number].name_prod,
+                                                                       start_price=all_product[page_number].start_price,
+                                                                       min_price=all_product[page_number].min_price,
+                                                                       price=all_product[page_number].price))
+        await callback.message.edit_media(media=photo,
+                                          reply_markup=await gen_markup_pagination(
+                                              str(all_product[page_number].id),
+                                              len(all_product),
+                                              page_number=page_number))
     await callback.answer()
 
 
