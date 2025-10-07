@@ -14,7 +14,7 @@ async def main() -> None:
     await bot.delete_webhook(drop_pending_updates=True)
     loop = asyncio.get_event_loop()
     loop.create_task(parsing_price_thread(10800))
-    loop.create_task(checking_tariff_thread(21600))
+    loop.create_task(checking_tariff_thread(43200))
     await dp.start_polling(bot)
 
 

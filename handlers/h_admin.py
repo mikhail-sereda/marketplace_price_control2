@@ -12,7 +12,7 @@ from data.FSMbot.FSMadmin import FiltersFSM, AddMoneyFSM, AddAdvertisementFSM
 from create_bot import bot
 from utils.other_utils import sends_ads
 # from utils.sqlite import migr_users
-from utils.parser1 import all_pars
+from utils.parser1 import get_data_product
 
 router: Router = Router()
 router.message.filter(AdmFilter())  # применяем ко всем хендлерам фильтр на админа

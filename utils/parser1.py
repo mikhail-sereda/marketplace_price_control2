@@ -10,7 +10,8 @@ from create_bot import bot
 from data import orm
 from static.caption import creating_caption_product
 
-url_get = 'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1257786&spp=29&nm='
+url_get0 = 'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1257786&spp=29&nm='
+url_get = "https://u-card.wb.ru/cards/v4/detail?appType=1&curr=rub&dest=-1275608&spp=30&ab_testing=false&ab_testing=false&lang=ru&nm=492575882"
 
 
 def defines_product_id(urls_user: str):
@@ -22,11 +23,7 @@ def defines_product_id(urls_user: str):
     except IndexError:
         return False
 
-
-def img_by_id(id_ph):
-    """формирует ссылу на фото товара"""
-    headers = {'User-Agent': UserAgent().chrome}
-    short_id = int(id_ph) // 100000
+def get_basket(short_id):
     basket = ''
     match short_id:
         case num if 0 <= short_id <= 143:
@@ -67,98 +64,121 @@ def img_by_id(id_ph):
         case num if short_id <= 2837:
             basket = "17"
 
-        case _:
+        case num if short_id <= 3053:
             basket = "18"
-        # case num if num in range(0, 144):
-        #     basket = '01'
-        # case num if num in range(144, 288):
-        #     basket = '02'
-        # case num if num in range(288, 432):
-        #     basket = '03'
-        # case num if num in range(432, 720):
-        #     basket = '04'
-        # case num if num in range(720, 1008):
-        #     basket = '05'
-        # case num if num in range(1008, 1062):
-        #     basket = '06'
-        # case num if num in range(1062, 1116):
-        #     basket = '07'
-        # case num if num in range(1116, 1170):
-        #     basket = '08'
-        # case num if num in range(1170, 1314):
-        #     basket = '09'
-        # case num if num in range(1314, 1602):
-        #     basket = '10'
-        # case num if num in range(1602, 1656):
-        #     basket = '11'
-        # case num if num in range(1656, 1920):
-        #     basket = '12'
-        # case _:
-        #     basket = '13'  # Если _short_id не входит ни в один из предыдущих диапазонов, присвоить '13' basket-у
-    # s = f'https://basket-{basket}.wb.ru/vol{short_id}/part{int(id_ph) // 1000}/{id_ph}/images/c246x328/1.jpg'
+
+        case num if short_id <= 3269:
+            basket = "19"
+
+        case num if short_id <= 3485:
+            basket = "20"
+
+        case num if short_id <= 3701:
+            basket = "21"
+
+        case num if short_id <= 3917:
+            basket = "22"
+
+        case num if short_id <= 4133:
+            basket = "23"
+
+        case num if short_id <= 4349:
+            basket = "24"
+
+        case num if short_id <= 4565:
+            basket = "25"
+
+        case num if short_id <= 4877:
+            basket = "26"
+
+        case num if short_id <= 5189:
+            basket = "27"
+
+        case num if short_id <= 5501:
+            basket = "28"
+
+        case num if short_id <= 5813:
+            basket = "29"
+
+        case num if short_id <= 6125:
+            basket = "30"
+
+        case num if short_id <= 6437:
+            basket = "31"
+
+        case _:
+            basket = "32"
+    return basket
+
+
+def img_by_id(id_ph):
+    """формирует ссылу на фото товара"""
+    headers = {'User-Agent': UserAgent().chrome}
+    short_id = int(id_ph) // 100000
+    basket = get_basket(short_id)
+
     s = f'https://basket-{basket}.wbbasket.ru/vol{short_id}/part{int(id_ph) // 1000}/{id_ph}/images/c246x328/1.webp'
     try:
         requests.get(s, headers)
         return s
     except:
-        s = 'https://avatars.mds.yandex.net/i?id=a53e9cddb18926e986bddd7acb96cd3973307967-10088009-images-thumbs&n=13'
+        s = 'https://sizprom.ru/image/cache/files/no-img_1488-1200x800.jpg'
         return s
 
 
 def generates_link_request(id_prod):
     """ get запрос по id, возращает словарь с полным описанием товара"""
     headers = {'User-Agent': UserAgent().chrome}
-    url_get_user = url_get + id_prod
-    req = requests.get(url_get_user, headers)
+    params = {"appType": "1",
+             "curr": "rub",
+             "dest": "-1275608",
+             "spp": "30",
+             "ab_testing": "false",
+             "lang": "ru",
+             "nm": id_prod}
+    url_get_card_json = "https://u-card.wb.ru/cards/v4/detail"
+    req = requests.get(url_get_card_json, params=params, headers=headers,)
     return req.json()
 
 
 def selects_values(js_dict):
     """Выбирает нужные характеристики"""
-    # pprint.pprint(js_dict)
-    dict_bd = dict()
 
-    dict_bd['id_prod'] = js_dict['data']['products'][0]['id']
-    dict_bd['name_prod'] = js_dict['data']['products'][0]['name']
+    dict_bd = dict()
+    pprint.pprint(js_dict)
+    dict_bd['id_prod'] = js_dict['products'][0]['id']
+    dict_bd['name_prod'] = js_dict['products'][0]['name']
     try:
-        if 'clientPriceU' in js_dict['data']['products'][0]['extended']:
-            dict_bd['price'] = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+        if int(js_dict['products'][0]['sizes'][0]['price']['product']) > 0:
+            dict_bd['price'] = int(js_dict['products'][0]['sizes'][0]['price']['product']) / 100
         else:
-            dict_bd['price'] = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
+            dict_bd['price'] = int(js_dict['products'][0]['sizes'][0]['price']['basic']) / 100
     except KeyError:
-        if 'salePriceU' in js_dict['data']['products'][0]:
-            dict_bd['price'] = js_dict['data']['products'][0]['salePriceU'] / 100
-        else:
-            dict_bd['price'] = js_dict['data']['products'][0]['priceU'] / 100
+        dict_bd['price'] = 999999
     return dict_bd
 
 
-def all_pars(id_all):
+def get_data_product(id_all):
     """При первом парсенге ссылки"""
     a = generates_link_request(id_all)
-    all_bd = (selects_values(a))
+    all_bd = selects_values(a)
     return all_bd
 
 
-def parsing_all():
+def parsing_all_price():
     """Парсит цены и сравнивает их с ценой и мин ценой в БД. Если изменено перезаписывает"""
     all_product = orm.db_get_all_product()  # только активные продукты
-    headers = {'User-Agent': UserAgent().chrome}
+
     for i in all_product:
-        url_get_prod = url_get + str(i.id_prod)
-        req = requests.get(url_get_prod, headers)
-        js_dict = req.json()
-        if js_dict['data']['products']:
+        js_dict = generates_link_request(i.id)
+        if js_dict['products']:
             try:
-                if 'clientPriceU' in js_dict['data']['products'][0]['extended']:
-                    price = js_dict['data']['products'][0]['extended']['clientPriceU'] / 100
+                if int(js_dict['products'][0]['sizes'][0]['price']['product']) > 0:
+                    price = int(js_dict['products'][0]['sizes'][0]['price']['product']) / 100
                 else:
-                    price = js_dict['data']['products'][0]['extended']['basicPriceU'] / 100
+                    price = int(js_dict['products'][0]['sizes'][0]['price']['basic']) / 100
             except KeyError:
-                if 'salePriceU' in js_dict['data']['products'][0]:
-                    price = js_dict['data']['products'][0]['salePriceU'] / 100
-                else:
-                    price = js_dict['data']['products'][0]['priceU'] / 100
+                price = 999999
             if i.pars_price != price:
                 orm.db_adjusts_pars_price(id_prod=i.id, price=price)
 
@@ -212,6 +232,6 @@ async def parsing_price_thread(wait_for):
     """Запускает новый поток для парсинга"""
     while True:
         await asyncio.sleep(wait_for)
-        parsing = threading.Thread(target=parsing_all)
+        parsing = threading.Thread(target=parsing_all_price)
         parsing.start()
         await sends_price_change_message()

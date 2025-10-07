@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart
 
 from keyboards.kb_user import kb_main_user
 from data import orm
-from utils.parser1 import img_by_id, all_pars
+from utils.parser1 import img_by_id, get_data_product
 from filters.my_filter import CheckTariff, CheckLink
 from static.caption import creating_caption_product, creating_text_help
 
@@ -34,10 +34,11 @@ async def parsing_link(msg: types.Message):
     """Получает ссылку на wildber выбирает id передаёт парсеру и записывает в бд"""
     product_dict = {'user_id': msg.from_user.id, 'link': msg.text}
     url_list = msg.text.split('/')
+    #TODO Придумать как эффективней вытащить ID из ссылки
     id_prod = list(
         filter(lambda x: x.isnumeric(), url_list))  # список строк состоящих из цифр из переданного сообщенния
     try:
-        prod_info = all_pars(id_prod[0])
+        prod_info = get_data_product(id_prod[0])
         product_dict.update(prod_info)
         product_dict['min_price'] = prod_info['price']
         product_dict['start_price'] = prod_info['price']
@@ -52,6 +53,7 @@ async def parsing_link(msg: types.Message):
                                                                     min_price=product_dict['start_price'],
                                                                     price=product_dict['pars_price']))
         else:
+            # TODO делать проверку отслеживается ли товар до парсинга (либо предлагать изменить стартовую цену)
             await msg.answer(text='Ссылка уже отслеживается')
     except:
         await msg.answer(text='Не верная ссылка')
