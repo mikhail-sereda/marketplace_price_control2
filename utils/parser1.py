@@ -143,9 +143,7 @@ def generates_link_request(id_prod):
 
 def selects_values(js_dict):
     """Выбирает нужные характеристики"""
-
     dict_bd = dict()
-    pprint.pprint(js_dict)
     dict_bd['id_prod'] = js_dict['products'][0]['id']
     dict_bd['name_prod'] = js_dict['products'][0]['name']
     try:
@@ -154,7 +152,7 @@ def selects_values(js_dict):
         else:
             dict_bd['price'] = int(js_dict['products'][0]['sizes'][0]['price']['basic']) / 100
     except KeyError:
-        dict_bd['price'] = 999999
+        dict_bd['price'] = 9999999
     return dict_bd
 
 
@@ -168,9 +166,8 @@ def get_data_product(id_all):
 def parsing_all_price():
     """Парсит цены и сравнивает их с ценой и мин ценой в БД. Если изменено перезаписывает"""
     all_product = orm.db_get_all_product()  # только активные продукты
-
     for i in all_product:
-        js_dict = generates_link_request(i.id)
+        js_dict = generates_link_request(i.id_prod)
         if js_dict['products']:
             try:
                 if int(js_dict['products'][0]['sizes'][0]['price']['product']) > 0:
@@ -178,7 +175,7 @@ def parsing_all_price():
                 else:
                     price = int(js_dict['products'][0]['sizes'][0]['price']['basic']) / 100
             except KeyError:
-                price = 999999
+                price = i.pars_price
             if i.pars_price != price:
                 orm.db_adjusts_pars_price(id_prod=i.id, price=price)
 

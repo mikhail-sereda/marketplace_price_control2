@@ -1,6 +1,7 @@
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 
+from create_bot import bot
 from keyboards.kb_user import kb_main_user
 from data import orm
 from utils.parser1 import img_by_id, get_data_product
@@ -52,6 +53,11 @@ async def parsing_link(msg: types.Message):
                                                                     start_price=product_dict['min_price'],
                                                                     min_price=product_dict['start_price'],
                                                                     price=product_dict['pars_price']))
+            if prod_info['price'] == 9999999:
+                await bot.send_message(chat_id=msg.chat.id, text='<b>⚠️Не удалось получить цену товара.</b>\n'
+                                                                 'Возможно товар закончился🤷\n'
+                                                                 'Когда товар появится в продаже бот пришлёт сообщение о изменении цены.')
+
         else:
             # TODO делать проверку отслеживается ли товар до парсинга (либо предлагать изменить стартовую цену)
             await msg.answer(text='Ссылка уже отслеживается')
